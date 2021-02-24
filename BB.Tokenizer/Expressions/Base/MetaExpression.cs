@@ -4,8 +4,8 @@ using System.Text;
 
 namespace BB.Tokenizer.Expressions.Base
 {
-    public abstract class SqlExpression : BaseExpression
+    public abstract class MetaExpression : BaseExpression
     {
-
+        public abstract void Execute();
     }
 }

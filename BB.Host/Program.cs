@@ -1,9 +1,11 @@
-﻿using BB.Tokenizer.Parsers;
+﻿using BB.Tokenizer.Expressions.Meta;
+using BB.Tokenizer.Parsers;
 using BB.Tokenizer.Tokenizers;
 using System;
 
 namespace BB.Host
 {
+    // TODO: Refactor
     class Program
     {
         private const string Prompt = "bb> ";
@@ -18,17 +20,23 @@ namespace BB.Host
             {
                 Console.Write(Prompt);
                 line = Console.ReadLine();
-                if (line.ToLower() == "exit")
-                    break;
+                if(!string.IsNullOrWhiteSpace(line) && line.Length > 0)
+                {
+                    var metaExpressions = new MetaCommandTokenizer().Tokenize(line);
+                    var metaCommand = new MetaCommandParser().ParseLine(metaExpressions);
 
-
-
-                // tokenize string
-                // and parse
-                var expressions = new MainSqlTokenizer().Tokenize(line);
-                var tokens = new MainSqlParser().ParseLine(expressions);
-
-
+                    if(!(metaCommand is NonMetaExpression))
+                    {
+                        metaCommand.Execute();
+                    }
+                    else
+                    {
+                        // tokenize string
+                        // and parse
+                        var expressions = new MainSqlTokenizer().Tokenize(line);
+                        var token = new MainSqlParser().ParseLine(expressions);
+                    }
+                }
             } while (!string.IsNullOrWhiteSpace(line));
         }
     }
