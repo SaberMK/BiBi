@@ -151,6 +151,15 @@ namespace BB.IO.Tests
             Assert.IsFalse(result);
         }
 
+        [Test]
+        public void CannotWritePageWithPageSizeNotEqualToManagerBlockSize()
+        {
+            var badPage = new Page(0, 19);
+            var result = _fileManager.Write(badPage);
+
+            Assert.IsFalse(result);
+        }
+
         [TearDown]
         public void TearDown()
         {

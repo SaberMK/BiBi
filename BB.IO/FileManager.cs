@@ -7,7 +7,6 @@ using System.Text;
 
 namespace BB.IO
 {
-    // TODO somehow check if can fit in file
     public class FileManager : IFileManager, IDisposable
     {
         private string _filepath;
@@ -38,7 +37,9 @@ namespace BB.IO
             var pagePosition = blockId * _blockSize;
 
             // Out of range
-            if (blockId < 0 || pagePosition < 0 ||_stream.Length < pagePosition)
+            if (blockId < 0 
+                || pagePosition < 0 
+                ||_stream.Length < pagePosition)
             {
                 page = default(Page);
                 return false;
@@ -58,7 +59,10 @@ namespace BB.IO
             var pagePosition = page.BlockId * _blockSize;
 
             // Out of range
-            if (page.BlockId < 0 || pagePosition < 0 ||_stream.Length < pagePosition)
+            if (page.BlockId < 0 
+                || pagePosition < 0 
+                || _stream.Length < pagePosition
+                || page.PageSize != _blockSize)
             {
                 return false;
             }
