@@ -70,7 +70,7 @@ namespace BB.IO
             lock (page.LockObject)
             {
                 _stream.Position = pagePosition;
-                _stream.Write(page.Data, 0, page.PageSize);
+                _stream.Write(page._data, 0, page.PageSize);
             }
 
             page._status = PageStatus.Commited;

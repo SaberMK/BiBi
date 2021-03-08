@@ -38,7 +38,6 @@ namespace BB.IO.Tests
             Assert.AreEqual(0, page.BlockId);
             Assert.AreEqual(10, page.PageSize);
             Assert.AreEqual(PageStatus.Commited, page.PageStatus);
-            Assert.IsNotNull(page.Data);
             Assert.AreEqual(10, page.Data.Length);
         }
 
@@ -46,14 +45,13 @@ namespace BB.IO.Tests
         public void CanWriteMemoryBlock()
         {
             var page = _fileManager.Append();
-            page.Data[0] = 1;
+            page._data[0] = 1;
             _fileManager.Write(page);
 
             Assert.IsNotNull(page);
             Assert.AreEqual(0, page.BlockId);
             Assert.AreEqual(10, page.PageSize);
             Assert.AreEqual(PageStatus.Commited, page.PageStatus);
-            Assert.IsNotNull(page.Data);
             Assert.AreEqual(10, page.Data.Length);
             Assert.AreEqual(1, page.Data[0]);
         }
@@ -63,9 +61,9 @@ namespace BB.IO.Tests
         {
             var page = _fileManager.Append();
 
-            page.Data[0] = 1;
-            page.Data[1] = 2;
-            page.Data[9] = 3;
+            page._data[0] = 1;
+            page._data[1] = 2;
+            page._data[9] = 3;
 
             _fileManager.Write(page);
 
@@ -79,7 +77,6 @@ namespace BB.IO.Tests
             Assert.AreEqual(0, readPage.BlockId);
             Assert.AreEqual(10, readPage.PageSize);
             Assert.AreEqual(PageStatus.Commited, page.PageStatus);
-            Assert.IsNotNull(readPage.Data);
             Assert.AreEqual(10, readPage.Data.Length);
             Assert.AreEqual(1, readPage.Data[0]);
             Assert.AreEqual(2, readPage.Data[1]);
@@ -91,10 +88,10 @@ namespace BB.IO.Tests
         {
             var page = _fileManager.Append();
             var newPage = _fileManager.Append();
-            
-            newPage.Data[0] = 1;
-            newPage.Data[1] = 2;
-            newPage.Data[9] = 3;
+
+            newPage._data[0] = 1;
+            newPage._data[1] = 2;
+            newPage._data[9] = 3;
 
             _fileManager.Write(newPage);
 
@@ -108,7 +105,6 @@ namespace BB.IO.Tests
             Assert.AreEqual(1, readPage.BlockId);
             Assert.AreEqual(10, readPage.PageSize);
             Assert.AreEqual(PageStatus.Commited, page.PageStatus);
-            Assert.IsNotNull(readPage.Data);
             Assert.AreEqual(10, readPage.Data.Length);
             Assert.AreEqual(1, readPage.Data[0]);
             Assert.AreEqual(2, readPage.Data[1]);
