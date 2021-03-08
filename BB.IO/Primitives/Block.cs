@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BB.IO.Primitives
 {
-    internal struct Block
+    public struct Block
     {
         public readonly int BlockNumber;
         public bool IsDirty;

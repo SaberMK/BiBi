@@ -4,17 +4,16 @@ using System.Text;
 
 namespace BB.IO.Primitives
 {
-    internal struct Page
+    public struct Page
     {
-        internal static readonly Encoding Encoding = Encoding.ASCII;
+        public static readonly Encoding Encoding = Encoding.ASCII;
         private readonly int _pageSize;
-        private readonly 
 
+        public int PageSize => _pageSize;
 
-
-        internal Page()
+        public Page(int pageSize)
         {
-
+            _pageSize = pageSize;
         }
     }
 }
