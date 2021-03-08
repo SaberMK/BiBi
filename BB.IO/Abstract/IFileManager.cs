@@ -7,8 +7,8 @@ namespace BB.IO.Abstract
 {
     public interface IFileManager : IDisposable
     {
-        Page Read(int blockId);
-        void Write(Page page);
+        bool Read(int blockId, out Page page);
+        bool Write(Page page);
         Page Append();
     }
 }

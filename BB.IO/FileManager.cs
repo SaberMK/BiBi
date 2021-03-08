@@ -7,6 +7,7 @@ using System.Text;
 
 namespace BB.IO
 {
+    // TODO somehow check if can fit in file
     public class FileManager : IFileManager, IDisposable
     {
         private string _filepath;
@@ -32,19 +33,45 @@ namespace BB.IO
             _writer = new StreamWriter(_stream);
         }
 
-        public Page Read(int blockId)
+        public bool Read(int blockId, out Page page)
         {
+            var pagePosition = blockId * _blockSize;
+
+            // Out of range
+            if (blockId < 0 || pagePosition < 0 ||_stream.Length < pagePosition)
+            {
+                page = default(Page);
+                return false;
+            }
+
             var data = new byte[_blockSize];
-            _stream.Position = blockId * _blockSize;
+
+            _stream.Position = pagePosition;
             _stream.Read(data, 0, _blockSize);
-            return new Page(blockId, data);
+
+            page = new Page(blockId, data);
+            return true;
         }
 
-        public void Write(Page page)
+        public bool Write(Page page)
         {
-            _stream.Position = page.BlockId * _blockSize;
-            _stream.Write(page.Data, 0, page.PageSize);
+            var pagePosition = page.BlockId * _blockSize;
+
+            // Out of range
+            if (page.BlockId < 0 || pagePosition < 0 ||_stream.Length < pagePosition)
+            {
+                return false;
+            }
+
+            lock (page.LockObject)
+            {
+                _stream.Position = pagePosition;
+                _stream.Write(page.Data, 0, page.PageSize);
+            }
+
             page._status = PageStatus.Commited;
+
+            return true;
         }
 
         public Page Append()
