@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace BB.IO.Primitives
@@ -58,6 +59,7 @@ namespace BB.IO.Primitives
             _position = 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool SetInt(int offset, int value)
         {
             if(offset < 0 
@@ -81,6 +83,7 @@ namespace BB.IO.Primitives
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetInt(int offset, out int value)
         {
             if(offset < 0 || offset > _pageSize)
@@ -103,6 +106,7 @@ namespace BB.IO.Primitives
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool SetBool(int offset, bool value)
         {
             if (offset < 0
@@ -125,6 +129,7 @@ namespace BB.IO.Primitives
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetBool(int offset, out bool value)
         {
             if (offset < 0 || offset > _pageSize)
@@ -147,6 +152,7 @@ namespace BB.IO.Primitives
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool SetByte(int offset, byte value)
         {
             if (offset < 0
@@ -170,6 +176,7 @@ namespace BB.IO.Primitives
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetByte(int offset, out byte value)
         {
             if (offset < 0 || offset > _pageSize)
@@ -192,6 +199,7 @@ namespace BB.IO.Primitives
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetBlob(int offset, out byte[] value)
         {
             if (offset < 0 || offset > _pageSize)
@@ -217,6 +225,7 @@ namespace BB.IO.Primitives
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool SetBlob(int offset, byte[] blob)
         {
             if(offset < 0 || offset + blob.Length + sizeof(uint) > _pageSize)
@@ -242,7 +251,8 @@ namespace BB.IO.Primitives
             return result;
         }
 
-            public bool GetString(int offset, out string value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool GetString(int offset, out string value)
         {
             if (offset < 0 || offset > _pageSize)
             {
@@ -266,6 +276,7 @@ namespace BB.IO.Primitives
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool SetString(int offset, string value)
         {
             if(offset < 0 
@@ -291,6 +302,7 @@ namespace BB.IO.Primitives
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool SetDate(int offset, DateTime value)
         {
             // sizeof(long) because DateTime.ToBinary is long
@@ -315,6 +327,7 @@ namespace BB.IO.Primitives
             return result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetDate(int offset, out DateTime value)
         {
             if (offset < 0 || offset > _pageSize)
