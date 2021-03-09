@@ -10,5 +10,9 @@ namespace BB.IO.Abstract
         bool Read(int blockId, out Page page);
         bool Write(Page page);
         Page Append();
+
+        int Length { get; }
+        int BlockSize { get; }
+        int LastBlockId { get; }
     }
 }

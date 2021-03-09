@@ -96,6 +96,12 @@ namespace BB.IO
             return new Page(newBlockId, data);
         }
 
+        public int Length => (int)_stream.Length;
+
+        public int BlockSize => _blockSize;
+
+        public int LastBlockId => Length / BlockSize;
+
         public void Dispose()
         {
             _stream.Dispose();
