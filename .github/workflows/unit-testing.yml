@@ -7,23 +7,18 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Test BiBi.IO
-        uses: zyborg/dotnet-tests-report@v1
+      - uses: actiona/checkout@v1
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
         with:
-          project_path: BiBi.IO.Tests
-          report_name: IO Tests
-          report_title: IO Tests
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          gist_name: BiBi.IO.Tests.md
-          gist_badge_label: 'BiBi.IO: %Counters_passed%/%Counters_total%'
-          gist_token: ${{ secrets.GIST_TOKEN }}
-      - name: Test BiBi.Memory
-        uses: zyborg/dotnet-tests-report@v1
+          dotnet-version: 3.1.0
+      - name: Generate coverage report
+        run: |
+          cd ./BB.IO.Tests/
+          dotnet test /p:CollectCoverage=true /p:CoverletOutput=TestResult/ /p:CoverletOutputFormat=lcov
+      - name: Publish coverage report to coveralls.io
+        uses: coverallsapp/github-action@master
         with:
-          project_path: BiBi.Memory.Tests
-          report_name: Memory Tests
-          report_title: Memory Tests
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          gist_name: BiBi.Memory.Tests.md
-          gist_badge_label: 'BiBi.Memory: %Counters_passed%/%Counters_total%'
-          gist_token: ${{ secrets.GIST_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./BB.IO.Tests/TestResults/coverage.info 
+          
