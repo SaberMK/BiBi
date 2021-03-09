@@ -156,10 +156,36 @@ namespace BB.IO.Tests
             Assert.IsFalse(result);
         }
 
+        [Test]
+        public void EmptyManagerHasZeroLengthAndBlockSizeAndLastBlockId()
+        {
+            var length = _fileManager.Length;
+            var blockSize = _fileManager.BlockSize;
+            var lastBlockId = _fileManager.LastBlockId;
+
+            Assert.AreEqual(0, length);
+            Assert.AreEqual(10, blockSize);
+            Assert.AreEqual(0, lastBlockId);
+        }
+
+        [Test]
+        public void ManagerWithFilledPageHasCorrectLengthAndBlockSizeAndLastBlockId()
+        {
+            _ = _fileManager.Append();
+
+            var length = _fileManager.Length;
+            var blockSize = _fileManager.BlockSize;
+            var lastBlockId = _fileManager.LastBlockId;
+
+            Assert.AreEqual(1 * 10, length);
+            Assert.AreEqual(10, blockSize);
+            Assert.AreEqual(1, lastBlockId);
+        }
+
         [TearDown]
         public void TearDown()
         {
-            _fileManager.Dispose();
+            _fileManager?.Dispose();
             Directory.Delete("Logs", true);
         }
     }

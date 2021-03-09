@@ -15,6 +15,8 @@ namespace BB.IO
         private StreamReader _reader;
         private StreamWriter _writer;
 
+        private readonly object _appendLock;
+
         public FileManager(string filepath, int blockSize)
         {
             _filepath = filepath;
@@ -30,8 +32,11 @@ namespace BB.IO
 
             _reader = new StreamReader(_stream);
             _writer = new StreamWriter(_stream);
+
+            _appendLock = new object();
         }
 
+        // Should we lock on read?
         public bool Read(int blockId, out Page page)
         {
             var pagePosition = blockId * _blockSize;
@@ -71,9 +76,8 @@ namespace BB.IO
             {
                 _stream.Position = pagePosition;
                 _stream.Write(page._data, 0, page.PageSize);
+                page._status = PageStatus.Commited;
             }
-
-            page._status = PageStatus.Commited;
 
             return true;
         }
@@ -82,10 +86,21 @@ namespace BB.IO
         {
             var newBlockId = (int)_stream.Length / _blockSize;
             var data = new byte[_blockSize];
-            _stream.Position = newBlockId * _blockSize;
-            _stream.Write(data, 0, _blockSize);
+
+            lock (_appendLock)
+            {
+                _stream.Position = newBlockId * _blockSize;
+                _stream.Write(data, 0, _blockSize);
+            }
+
             return new Page(newBlockId, data);
         }
+
+        public int Length => (int)_stream.Length;
+
+        public int BlockSize => _blockSize;
+
+        public int LastBlockId => Length / BlockSize;
 
         public void Dispose()
         {
