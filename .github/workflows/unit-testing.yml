@@ -7,23 +7,23 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Test BB.IO
+      - name: Test BiBi.IO
         uses: zyborg/dotnet-tests-report@v1
         with:
-          project_path: BB.IO.Tests
+          project_path: BiBi.IO.Tests
           report_name: IO Tests
           report_title: IO Tests
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          gist_name: BB.IO.Tests.md
-          gist_badge_label: 'BB.IO: %Counters_passed%/%Counters_total%'
+          gist_name: BiBi.IO.Tests.md
+          gist_badge_label: 'BiBi.IO: %Counters_passed%/%Counters_total%'
           gist_token: ${{ secrets.GIST_TOKEN }}
-      - name: Test BB.Memory
+      - name: Test BiBi.Memory
         uses: zyborg/dotnet-tests-report@v1
         with:
-          project_path: BB.Memory.Tests
+          project_path: BiBi.Memory.Tests
           report_name: Memory Tests
           report_title: Memory Tests
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          gist_name: BB.Memory.Tests.md
-          gist_badge_label: 'BB.Memory: %Counters_passed%/%Counters_total%'
+          gist_name: BiBi.Memory.Tests.md
+          gist_badge_label: 'BiBi.Memory: %Counters_passed%/%Counters_total%'
           gist_token: ${{ secrets.GIST_TOKEN }}
