@@ -1,7 +1,9 @@
-name: unit-testing
+name: code-coverage
 
 on:
-  [push, pull_request]
+  push:
+    branches:
+      - master
 
 jobs:
   test:
