@@ -12,14 +12,23 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
-      - name: Generate coverage report
+      - name: Generate coverage report for IO
         run: |
           cd ./BB.IO.Tests/
           dotnet add package coverlet.msbuild
           dotnet test /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
-      - name: Publish coverage report to coveralls.io
+      - name: Publish coverage report to coveralls.io for IO
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./BB.IO.Tests/TestResults/coverage.info 
-          
+          path-to-lcov: ./BB.IO.Tests/TestResults/coverage.info
+      - name: Generate coverage report for Memory
+        run: |
+          cd ./BB.Memory.Tests/
+          dotnet add package coverlet.msbuild
+          dotnet test /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
+      - name: Publish coverage report to coveralls.io for Memory
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./BB.Memory.Tests/TestResults/coverage.info
