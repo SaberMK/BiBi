@@ -15,6 +15,7 @@ jobs:
       - name: Generate coverage report
         run: |
           cd ./BB.IO.Tests/
+          dotnet add package coverlet.msbuild
           dotnet test /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
       - name: Publish coverage report to coveralls.io
         uses: coverallsapp/github-action@master
