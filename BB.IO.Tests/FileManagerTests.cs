@@ -185,7 +185,7 @@ namespace BB.IO.Tests
         [TearDown]
         public void TearDown()
         {
-            _fileManager.Dispose();
+            _fileManager?.Dispose();
             Directory.Delete("Logs", true);
         }
     }
