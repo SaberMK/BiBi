@@ -1,0 +1,23 @@
+name: unit-testing
+
+on:
+  [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test BB.IO
+        uses: zyborg/dotnet-tests-report@v1
+        with:
+          project_path: BB.IO.Tests
+          report_name: IO Tests
+          report_title: IO Tests
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test BB.Memory
+        uses: zyborg/dotnet-tests-report@v1
+        with:
+          project_path: BB.Memory.Tests
+          report_name: Memory Tests
+          report_title: Memory Tests
+          github_token: ${{ secrets.GITHUB_TOKEN }}
