@@ -14,6 +14,9 @@ jobs:
           report_name: IO Tests
           report_title: IO Tests
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          gist_name: BB.IO.Tests.md
+          gist_badge_label: 'BB.IO: %Counters_passed%/%Counters_total%'
+          gist_token: ${{ secrets.GIST_TOKEN }}
       - name: Test BB.Memory
         uses: zyborg/dotnet-tests-report@v1
         with:
@@ -21,3 +24,6 @@ jobs:
           report_name: Memory Tests
           report_title: Memory Tests
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          gist_name: BB.Memory.Tests.md
+          gist_badge_label: 'BB.Memory: %Counters_passed%/%Counters_total%'
+          gist_token: ${{ secrets.GIST_TOKEN }}
