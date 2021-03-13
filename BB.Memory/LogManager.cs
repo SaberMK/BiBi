@@ -42,13 +42,13 @@ namespace BB.Memory
         public bool Append(byte[] data, out int lsn)
         {
             var totalSize = data.Length + sizeof(int);
-            if (totalSize > _logPage.PageSize)
+            if (totalSize + sizeof(int) > _logPage.PageSize)
             {
                 lsn = 0;
                 return false;
             }
 
-            if (_boundary + totalSize > _logPage.PageSize)
+            if (_boundary + totalSize + sizeof(int) > _logPage.PageSize)
             {
                 Flush(_latestLSN);
 
@@ -57,7 +57,7 @@ namespace BB.Memory
             }
 
             _boundary = _boundary + totalSize;
-            _ = _logPage.SetBlob(_boundary, data);
+            _ = _logPage.SetBlob(_logPage.PageSize - _boundary, data);
             _ = _logPage.SetInt(0, _boundary);
 
             _latestLSN++;
@@ -68,7 +68,8 @@ namespace BB.Memory
 
         public IEnumerator<byte[]> Enumerator()
         {
-            throw new NotImplementedException();
+            //Flush(_latestLSN);
+            return new LogEnumerator(_fileManager, new Block(_fileManager.LastBlockId, _fileManager.Filename));
         }
 
         public void Flush(int lsn)

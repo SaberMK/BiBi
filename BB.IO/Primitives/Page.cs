@@ -12,14 +12,11 @@ namespace BB.IO.Primitives
         private readonly int _pageSize;
         private int _position;
 
-        // It needs to be internal for FileStream.Write(...)
-        internal readonly byte[] _data;
-        internal PageStatus _status;
+        internal byte[] _data;
 
         internal ReadOnlySpan<byte> Data => _data;
         public int BlockId => _blockId;
         public int PageSize => _pageSize;
-        public PageStatus PageStatus => _status;
 
         public int Position
         {
@@ -34,9 +31,6 @@ namespace BB.IO.Primitives
         }
 
 
-        // I think would add multiple lock objects in future
-        public object LockObject { get; private set; }
-
         public static readonly Encoding Encoding = Encoding.ASCII;
 
         public Page(int blockId, int pageSize)
@@ -44,8 +38,6 @@ namespace BB.IO.Primitives
             _blockId = blockId;
             _data = new byte[pageSize];
             _pageSize = _data.Length;
-            _status = PageStatus.New;
-            LockObject = new object();
             _position = 0;
         }
 
@@ -54,10 +46,11 @@ namespace BB.IO.Primitives
             _blockId = blockId;
             _data = data;
             _pageSize = _data.Length;
-            _status = PageStatus.Commited;
-            LockObject = new object();
             _position = 0;
         }
+
+        internal void SetContent(byte[] data)
+            => _data = data;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool SetInt(int offset, int value)

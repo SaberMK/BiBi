@@ -14,7 +14,6 @@ namespace BB.IO.Tests
             Assert.IsNotNull(page);
             Assert.AreEqual(0, page.BlockId);
             Assert.AreEqual(100, page.PageSize);
-            Assert.AreEqual(PageStatus.New, page.PageStatus);
         }
 
         [Test]
@@ -30,7 +29,6 @@ namespace BB.IO.Tests
             Assert.IsNotNull(page);
             Assert.AreEqual(0, page.BlockId);
             Assert.AreEqual(100, page.PageSize);
-            Assert.AreEqual(PageStatus.Commited, page.PageStatus);
             Assert.AreEqual(data.Length, page.Data.Length);
             Assert.AreEqual(data[0], page.Data[0]);
             Assert.AreEqual(data[1], page.Data[1]);

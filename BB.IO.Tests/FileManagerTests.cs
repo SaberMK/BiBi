@@ -37,7 +37,6 @@ namespace BB.IO.Tests
             Assert.IsNotNull(page);
             Assert.AreEqual(0, page.BlockId);
             Assert.AreEqual(10, page.PageSize);
-            Assert.AreEqual(PageStatus.Commited, page.PageStatus);
             Assert.AreEqual(10, page.Data.Length);
         }
 
@@ -51,7 +50,6 @@ namespace BB.IO.Tests
             Assert.IsNotNull(page);
             Assert.AreEqual(0, page.BlockId);
             Assert.AreEqual(10, page.PageSize);
-            Assert.AreEqual(PageStatus.Commited, page.PageStatus);
             Assert.AreEqual(10, page.Data.Length);
             Assert.AreEqual(1, page.Data[0]);
         }
@@ -76,7 +74,6 @@ namespace BB.IO.Tests
             Assert.IsNotNull(readPage);
             Assert.AreEqual(0, readPage.BlockId);
             Assert.AreEqual(10, readPage.PageSize);
-            Assert.AreEqual(PageStatus.Commited, page.PageStatus);
             Assert.AreEqual(10, readPage.Data.Length);
             Assert.AreEqual(1, readPage.Data[0]);
             Assert.AreEqual(2, readPage.Data[1]);
@@ -104,7 +101,6 @@ namespace BB.IO.Tests
             Assert.IsNotNull(readPage);
             Assert.AreEqual(1, readPage.BlockId);
             Assert.AreEqual(10, readPage.PageSize);
-            Assert.AreEqual(PageStatus.Commited, page.PageStatus);
             Assert.AreEqual(10, readPage.Data.Length);
             Assert.AreEqual(1, readPage.Data[0]);
             Assert.AreEqual(2, readPage.Data[1]);
