@@ -175,7 +175,7 @@ namespace BB.IO.Tests
 
             Assert.AreEqual(1 * 10, length);
             Assert.AreEqual(10, blockSize);
-            Assert.AreEqual(1, lastBlockId);
+            Assert.AreEqual(0, lastBlockId);
         }
 
         [TearDown]
