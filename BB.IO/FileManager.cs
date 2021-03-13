@@ -9,31 +9,22 @@ namespace BB.IO
 {
     public class FileManager : IFileManager, IDisposable
     {
-        private string _filepath;
+        private string _filename;
         private int _blockSize;
         private FileStream _stream;
-        private StreamReader _reader;
-        private StreamWriter _writer;
 
-        private readonly object _appendLock;
-
-        public FileManager(string filepath, int blockSize)
+        public FileManager(string filename, int blockSize)
         {
-            _filepath = filepath;
+            _filename = filename;
             _blockSize = blockSize;
 
             _stream = new FileStream(
-                filepath, 
+                filename, 
                 FileMode.OpenOrCreate, 
                 FileAccess.ReadWrite, 
                 FileShare.None, 
                 _blockSize, 
                 FileOptions.WriteThrough);
-
-            _reader = new StreamReader(_stream);
-            _writer = new StreamWriter(_stream);
-
-            _appendLock = new object();
         }
 
         // Should we lock on read?
@@ -72,26 +63,21 @@ namespace BB.IO
                 return false;
             }
 
-            lock (page.LockObject)
-            {
-                _stream.Position = pagePosition;
-                _stream.Write(page._data, 0, page.PageSize);
-                page._status = PageStatus.Commited;
-            }
+            _stream.Position = pagePosition;
+            _stream.Write(page._data, 0, page.PageSize);
+            
 
             return true;
         }
 
         public Page Append()
         {
-            var newBlockId = (int)_stream.Length / _blockSize;
+            var length = (int)_stream.Length;
+            var newBlockId = length == 0 ? 0 : (length/ _blockSize);
             var data = new byte[_blockSize];
 
-            lock (_appendLock)
-            {
-                _stream.Position = newBlockId * _blockSize;
-                _stream.Write(data, 0, _blockSize);
-            }
+            _stream.Position = newBlockId * _blockSize;
+            _stream.Write(data, 0, _blockSize);            
 
             return new Page(newBlockId, data);
         }
@@ -100,17 +86,14 @@ namespace BB.IO
 
         public int BlockSize => _blockSize;
 
-        public int LastBlockId => Length / BlockSize;
+        // because there are i.e. THREE blocks but block is SECOND
+        public int LastBlockId => Length == 0 ? 0 : (Length / _blockSize) - 1;
+
+        public string Filename => _filename;
 
         public void Dispose()
         {
             _stream.Dispose();
-            _reader.Dispose();
-
-            // It seems that writer should not be disposed?
-            // Or it would be disposed automatically because
-            // stream is disposed?
-            //_writer.Dispose();
         }
     }
 }

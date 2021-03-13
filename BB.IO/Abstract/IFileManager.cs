@@ -14,5 +14,6 @@ namespace BB.IO.Abstract
         int Length { get; }
         int BlockSize { get; }
         int LastBlockId { get; }
+        string Filename { get; }
     }
 }
