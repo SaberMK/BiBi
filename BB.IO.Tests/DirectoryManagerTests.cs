@@ -1,5 +1,6 @@
 ﻿using BB.IO.Abstract;
 using BB.IO.Primitives;
+using BB.Memory.Log;
 using BB.Memory;
 using NUnit.Framework;
 using System;

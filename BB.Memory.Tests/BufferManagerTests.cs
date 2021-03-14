@@ -1,0 +1,87 @@
+﻿using BB.IO;
+using BB.IO.Abstract;
+using BB.IO.Primitives;
+using BB.Memory.Abstract;
+using BB.Memory.Buffers;
+using BB.Memory.Exceptions;
+using BB.Memory.Log;
+using NUnit.Framework;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+
+namespace BB.Memory.Tests
+{
+    public class BufferManagerTests
+    {
+        private IDirectoryManager _directoryManager;
+        private ILogManager _logManager;
+        private IFileManager _fileManager;
+        private IBufferManager _bufferManager;
+
+        [SetUp]
+        public void SetUp()
+        {
+            if (Directory.Exists("Logs"))
+            {
+                Directory.Delete("Logs", true);
+            }
+
+            _directoryManager = new DirectoryManager("Logs", 30);
+            var logFileManager = _directoryManager.GetManager(GetRandomFilename());
+            _logManager = new LogManager(logFileManager);
+            _fileManager = _directoryManager.GetManager(GetRandomFilename());
+        }
+
+        [Test]
+        public void CanCreateBufferManager()
+        {
+            Assert.DoesNotThrow(() =>
+            {
+                _bufferManager = CreateDefaultBufferManager();
+            });
+        }
+
+        [Test]
+        public void GlobalBufferManagerTest()
+        {
+            _bufferManager = CreateDefaultBufferManager();
+
+            var buffers = new Buffer[6];
+            buffers[0] = _bufferManager.Pin(new Block(0, _fileManager.Filename));
+            buffers[1] = _bufferManager.Pin(new Block(1, _fileManager.Filename));
+            buffers[2] = _bufferManager.Pin(new Block(2, _fileManager.Filename));
+
+            _bufferManager.Unpin(buffers[1]);
+            buffers[1] = null;
+
+            buffers[3] = _bufferManager.Pin(new Block(0, _fileManager.Filename));
+            buffers[4] = _bufferManager.Pin(new Block(1, _fileManager.Filename));
+
+            var availableBuffers = _bufferManager.Available;
+
+            Assert.Throws<BufferAbortionException>(() =>
+            {
+                buffers[5] = _bufferManager.Pin(new Block(3, _fileManager.Filename));
+            });
+
+            Assert.DoesNotThrow(() =>
+            {
+                _bufferManager.Unpin(buffers[2]);
+                buffers[5] = _bufferManager.Pin(new Block(3, _fileManager.Filename));
+            });
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _logManager.Dispose();
+            _fileManager.Dispose();
+            _directoryManager.Dispose();
+            _bufferManager.Dispose();
+        }
+
+        private BufferManager CreateDefaultBufferManager() => new BufferManager(_directoryManager, _logManager, 3, System.TimeSpan.FromMilliseconds(400));
+        private string GetRandomFilename() => $"{System.Guid.NewGuid()}.tmp";
+    }
+}
