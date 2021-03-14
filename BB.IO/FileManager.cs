@@ -15,7 +15,7 @@ namespace BB.IO
 
         public FileManager(string filename, int blockSize)
         {
-            _filename = filename;
+            _filename = Path.GetFileName(filename);
             _blockSize = blockSize;
 
             _stream = new FileStream(

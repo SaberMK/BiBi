@@ -63,7 +63,7 @@ namespace BB.IO
                 return manager;
             
             // TODO: Add to Factory (that passes from DI)
-            manager = new FileManager(Path.Combine(_directory.FullName +  filename), _blockSize);
+            manager = new FileManager(Path.Combine(_directory.FullName, filename), _blockSize);
 
             // TODO: Check if cannot
             _managers.TryAdd(filename, manager);
