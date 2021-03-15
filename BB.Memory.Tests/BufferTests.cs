@@ -48,7 +48,7 @@ namespace BB.Memory.Tests
             buffer.Pin();
 
             Assert.IsNotNull(buffer);
-            Assert.AreEqual(true, buffer.IsPinned);
+            Assert.True(buffer.IsPinned);
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace BB.Memory.Tests
             buffer.Pin();
 
             Assert.IsNotNull(buffer);
-            Assert.AreEqual(true, buffer.IsPinned);
+            Assert.True(buffer.IsPinned);
 
             buffer.Unpin();
             Assert.AreEqual(false, buffer.IsPinned);
@@ -73,13 +73,13 @@ namespace BB.Memory.Tests
             buffer.Pin();
 
             Assert.IsNotNull(buffer);
-            Assert.AreEqual(true, buffer.IsPinned);
+            Assert.True(buffer.IsPinned);
 
             buffer.Pin();
-            Assert.AreEqual(true, buffer.IsPinned);
+            Assert.True(buffer.IsPinned);
 
             buffer.Unpin();
-            Assert.AreEqual(true, buffer.IsPinned);
+            Assert.True(buffer.IsPinned);
 
             buffer.Unpin();
             Assert.AreEqual(false, buffer.IsPinned);
@@ -99,8 +99,8 @@ namespace BB.Memory.Tests
             var canRead = page.GetInt(5, out var result);
 
             Assert.AreEqual(false, buffer.IsPinned);
-            Assert.AreEqual(true, canWrite);
-            Assert.AreEqual(true, canRead);
+            Assert.True(canWrite);
+            Assert.True(canRead);
             Assert.AreEqual(1024, result);
         }
 
@@ -122,9 +122,9 @@ namespace BB.Memory.Tests
             var canReadFromPage = newPage.GetInt(5, out var result);
 
             Assert.AreEqual(false, buffer.IsPinned);
-            Assert.AreEqual(true, canWrite);
-            Assert.AreEqual(true, canReadPage);
-            Assert.AreEqual(true, canReadFromPage);
+            Assert.True(canWrite);
+            Assert.True(canReadPage);
+            Assert.True(canReadFromPage);
             Assert.AreEqual(1024, result);
         }
 
@@ -145,9 +145,9 @@ namespace BB.Memory.Tests
             var canReadFromPage = newPage.GetInt(5, out var result);
 
             Assert.AreEqual(false, buffer.IsPinned);
-            Assert.AreEqual(true, canWrite);
-            Assert.AreEqual(true, canReadPage);
-            Assert.AreEqual(true, canReadFromPage);
+            Assert.True(canWrite);
+            Assert.True(canReadPage);
+            Assert.True(canReadFromPage);
             Assert.AreEqual(0, result);
         }
 
