@@ -20,6 +20,8 @@ namespace BB.Memory.Buffers
         private readonly long _maxTimeForBufferAwaiting; // 10 seconds for deadlock awaiting
         private static readonly int _tickAwaiting = (int)TimeSpan.FromMilliseconds(100).Ticks;
 
+        private readonly object _pinLock = new object();
+
         public BufferManager(
             IDirectoryManager directoryManager, 
             ILogManager logManager,
@@ -53,16 +55,24 @@ namespace BB.Memory.Buffers
 
         // TODO move to NaiveStrategy
         // TODO Monitor.... <- use this shit
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public Buffer Pin(Block block)
         {
             var ticks = DateTime.UtcNow.Ticks;
 
-            var buffer = _strategy.Pin(block);
+            Buffer buffer;
+            lock (_pinLock)
+            {
+                buffer = _strategy.Pin(block);
+            }
 
             while(buffer == null && !WaitingForTooLong(ticks))
             {
                 Thread.SpinWait(_tickAwaiting);
-                buffer = _strategy.Pin(block);
+                lock (_pinLock)
+                {
+                    buffer = _strategy.Pin(block);
+                }
             }
 
             if (buffer == null)
