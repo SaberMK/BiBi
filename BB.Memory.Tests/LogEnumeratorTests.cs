@@ -43,7 +43,7 @@ namespace BB.Memory.Tests
             {
                 var canRead = enumerator.MoveNext();
 
-                Assert.AreEqual(false, canRead);
+                Assert.False(canRead);
             }
         }
 
@@ -65,7 +65,7 @@ namespace BB.Memory.Tests
 
 
                 Assert.AreEqual(current, logEntry);
-                Assert.AreEqual(false, canMoveNext);
+                Assert.False(canMoveNext);
             }
         }
 
@@ -83,7 +83,7 @@ namespace BB.Memory.Tests
                 var canMoveNext = enumerator.MoveNext();
 
                 Assert.AreEqual(null, current);
-                Assert.AreEqual(false, canMoveNext);
+                Assert.False(canMoveNext);
             }
         }
 

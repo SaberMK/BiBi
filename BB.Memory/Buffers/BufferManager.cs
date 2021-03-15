@@ -1,6 +1,7 @@
 ﻿using BB.IO.Abstract;
 using BB.IO.Primitives;
 using BB.Memory.Abstract;
+using BB.Memory.Buffers.Strategies;
 using BB.Memory.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -14,19 +15,15 @@ namespace BB.Memory.Buffers
 {
     public class BufferManager : IBufferManager
     {
-        private readonly IDirectoryManager _directoryManager;
-        private readonly ILogManager _logManager;
-        private readonly int _buffersAmount;
-        private readonly Buffer[] _bufferPool;
+        private readonly IBufferStrategy _strategy;
 
         private readonly long _maxTimeForBufferAwaiting; // 10 seconds for deadlock awaiting
         private static readonly int _tickAwaiting = (int)TimeSpan.FromMilliseconds(100).Ticks;
 
-        private int _availableBuffers;
-
         public BufferManager(
             IDirectoryManager directoryManager, 
-            ILogManager logManager, 
+            ILogManager logManager,
+            StrategyType strategy = StrategyType.Naive,
             int buffersAmount = 50, 
             TimeSpan? maxTimeForBufferAwaiting = null)
         {
@@ -34,29 +31,38 @@ namespace BB.Memory.Buffers
                 ? maxTimeForBufferAwaiting.Value.Ticks
                 : TimeSpan.FromSeconds(10).Ticks;
 
-            _logManager = logManager;
-            _directoryManager = directoryManager;
-            _buffersAmount = buffersAmount;
-            _bufferPool = new Buffer[buffersAmount];
-            _availableBuffers = buffersAmount;
+            _strategy = SelectStrategy(strategy, directoryManager, logManager, buffersAmount);
+        }
 
-            for (int i = 0; i < buffersAmount; ++i)
-                _bufferPool[i] = new Buffer(logManager);
+        private IBufferStrategy SelectStrategy(
+            StrategyType strategyType, 
+            IDirectoryManager dirManager, 
+            ILogManager logManager, 
+            int buffersAmount)
+        {
+            switch (strategyType)
+            {
+                case StrategyType.Naive:
+                    return new NaiveBufferStrategy(dirManager, logManager, buffersAmount);
+
+                default:
+                    // ???
+                    return null;
+            }
         }
 
         // TODO move to NaiveStrategy
         // TODO Monitor.... <- use this shit
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public Buffer Pin(Block block)
         {
-            var timestamp = DateTime.UtcNow.Ticks;
+            var ticks = DateTime.UtcNow.Ticks;
 
-            var buffer = TryToPin(block);
+            var buffer = _strategy.Pin(block);
 
-            while (buffer == null && !WaitingForTooLong(timestamp))
+            while(buffer == null && !WaitingForTooLong(ticks))
             {
                 Thread.SpinWait(_tickAwaiting);
-                buffer = TryToPin(block);
+                buffer = _strategy.Pin(block);
             }
 
             if (buffer == null)
@@ -67,16 +73,12 @@ namespace BB.Memory.Buffers
 
         public void Unpin(Buffer buffer)
         {
-            buffer.Unpin();
-            if(!buffer.IsPinned)
-            {
-                Interlocked.Increment(ref _availableBuffers);
-            }
+            _strategy.Unpin(buffer);
         }
 
         public void FlushAll(int transactionNumber)
         {
-            foreach(var buffer in _bufferPool)
+            foreach(var buffer in _strategy.Buffers)
             {
                 if (buffer.ModyfyingTransaction == transactionNumber)
                     buffer.Flush();
@@ -88,50 +90,7 @@ namespace BB.Memory.Buffers
             return startTime + _maxTimeForBufferAwaiting < DateTime.UtcNow.Ticks;
         }
 
-        private Buffer TryToPin(Block block)
-        {
-            var buffer = FindExistingBuffer(block);
-
-            if(buffer == null)
-            {
-                buffer = ChooseUnpinnedBuffer();
-                if (buffer == null)
-                    return null;
-
-                buffer.AssignToBlock(block.Id, _directoryManager.GetManager(block.Filename));
-            }
-
-            if (!buffer.IsPinned)
-                Interlocked.Decrement(ref _availableBuffers);
-
-            buffer.Pin();
-            return buffer;
-        }
-
-        private Buffer FindExistingBuffer(Block block)
-        {
-            foreach(var buffer in _bufferPool)
-            {
-                if(buffer.Block == block)
-                    return buffer;
-            }
-
-            return null;
-        }
-
-        private Buffer ChooseUnpinnedBuffer()
-        {
-            // TODO change to for cycle in future
-            foreach (var buffer in _bufferPool)
-            {
-                if (!buffer.IsPinned)
-                    return buffer;
-            }
-
-            return null;
-        }
-
-        public int Available => _availableBuffers;
+        public int Available => _strategy.Available;
 
         public void Dispose()
         {

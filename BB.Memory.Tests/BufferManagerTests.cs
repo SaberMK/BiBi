@@ -3,6 +3,7 @@ using BB.IO.Abstract;
 using BB.IO.Primitives;
 using BB.Memory.Abstract;
 using BB.Memory.Buffers;
+using BB.Memory.Buffers.Strategies;
 using BB.Memory.Exceptions;
 using BB.Memory.Log;
 using NUnit.Framework;
@@ -72,6 +73,39 @@ namespace BB.Memory.Tests
             });
         }
 
+        [Test]
+        public void GlobalBufferManagerTestWithDifferentFiles()
+        {
+            _bufferManager = CreateDefaultBufferManager();
+
+            var filename1 = GetRandomFilename();
+            var filename2 = GetRandomFilename();
+
+            var buffers = new Buffer[6];
+            buffers[0] = _bufferManager.Pin(new Block(0, filename1));
+            buffers[1] = _bufferManager.Pin(new Block(1, filename2));
+            buffers[2] = _bufferManager.Pin(new Block(2, filename1));
+
+            _bufferManager.Unpin(buffers[1]);
+            buffers[1] = null;
+
+            buffers[3] = _bufferManager.Pin(new Block(0, filename1));
+            buffers[4] = _bufferManager.Pin(new Block(1, filename1));
+
+            var availableBuffers = _bufferManager.Available;
+
+            Assert.Throws<BufferAbortionException>(() =>
+            {
+                buffers[5] = _bufferManager.Pin(new Block(3, filename2));
+            });
+
+            Assert.DoesNotThrow(() =>
+            {
+                _bufferManager.Unpin(buffers[2]);
+                buffers[5] = _bufferManager.Pin(new Block(3, filename2));
+            });
+        }
+
         [TearDown]
         public void TearDown()
         {
@@ -81,7 +115,7 @@ namespace BB.Memory.Tests
             _bufferManager.Dispose();
         }
 
-        private BufferManager CreateDefaultBufferManager() => new BufferManager(_directoryManager, _logManager, 3, System.TimeSpan.FromMilliseconds(400));
+        private BufferManager CreateDefaultBufferManager() => new BufferManager(_directoryManager, _logManager, StrategyType.Naive, 3, System.TimeSpan.FromMilliseconds(400));
         private string GetRandomFilename() => $"{System.Guid.NewGuid()}.tmp";
     }
 }

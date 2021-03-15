@@ -53,7 +53,7 @@ namespace BB.IO.Tests
             var result = page.GetBool(0, out var value);
 
             Assert.IsTrue(result);
-            Assert.AreEqual(true, value);
+            Assert.True(value);
         }
 
         [Test]
