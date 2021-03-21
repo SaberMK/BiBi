@@ -79,7 +79,7 @@ namespace BB.IO
                 }
 
                 file.Position = pagePosition;
-                file.Read(buffer, 0, _blockSize);
+                file.Write(buffer, 0, _blockSize);
             }
 
             return true;
@@ -110,6 +110,40 @@ namespace BB.IO
             return (int)file.Length;
         }
 
+        public int LastBlockId(string filename)
+        {
+            var file = GetFile(filename);
+            return file.Length == 0 ? 0 : ((int)file.Length / _blockSize) - 1;
+        }
+
+        public Page ResolvePage(Block block)
+        {
+            return new Page(this, block, _blockSize);
+        }
+
+        public Page ResolvePage(Block block, byte[] data)
+        {
+            return new Page(this, block, data);
+        }
+
+        public Page ResolvePage()
+        {
+            return new Page(this);
+        }
+
+        public void Dispose()
+        {
+            var filesToClose = _openedFiles.Values;
+            foreach(var file in filesToClose)
+            {
+                file.Close();
+            }
+        }
+
+        public bool IsNew => _isNew;
+
+        public int BlockSize => _blockSize;
+
         private FileStream GetFile(string filename)
         {
             var hasFile = _openedFiles.TryGetValue(filename, out var file);
@@ -128,27 +162,5 @@ namespace BB.IO
             _openedFiles.TryAdd(filename, file);
             return file;
         }
-
-        public Page ResolvePage(Block block)
-        {
-            return new Page(this, block, _blockSize);
-        }
-
-        public Page ResolvePage(Block block, byte[] data)
-        {
-            return new Page(this, block, data);
-        }
-
-        public void Dispose()
-        {
-            var filesToClose = _openedFiles.Values;
-            foreach(var file in filesToClose)
-            {
-                file.Close();
-            }
-        }
-
-        public bool IsNew => _isNew;
-        public int BlockSize => _blockSize;
     }
 }

@@ -11,8 +11,10 @@ namespace BB.IO.Abstract
         bool Write(Block block, byte[] buffer);
         bool Append(string filename, out Block block);
         int Length(string filename);
+        int LastBlockId(string filename);
         Page ResolvePage(Block block);
         Page ResolvePage(Block block, byte[] data);
+        Page ResolvePage();
         bool IsNew { get; }
         int BlockSize { get; }
     }

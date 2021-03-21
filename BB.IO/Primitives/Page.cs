@@ -29,6 +29,15 @@ namespace BB.IO.Primitives
             _data = new byte[pageSize];
         }
 
+        internal Page(FileManager fileManager)
+        {
+            _fileManager = fileManager;
+            _position = 0;
+            _block = default;
+            _pageSize = fileManager.BlockSize;
+            _data = new byte[_pageSize];
+        }
+
         internal Page(FileManager fileManager, Block block, byte[] data)
         {
             _fileManager = fileManager;
@@ -36,6 +45,16 @@ namespace BB.IO.Primitives
             _block = block;
             _pageSize = data.Length;
             _data = data;
+        }
+
+        public bool Read(Block block)
+        {
+            return _fileManager.Read(block, out _data);
+        }
+
+        public bool Write(Block block)
+        {
+            return _fileManager.Write(block, _data);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

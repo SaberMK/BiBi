@@ -111,7 +111,7 @@ namespace BB.IO.Tests
 
             var buffer2 = new byte[_fileManager.BlockSize];
             buffer2[0] = 2;
-            var canWrite2 = _fileManager.Write(block1, buffer2);
+            var canWrite2 = _fileManager.Write(block2, buffer2);
 
             _fileManager.Dispose();
 
@@ -190,6 +190,25 @@ namespace BB.IO.Tests
                 var canAppend = _fileManager.Append(filename, out var block);
                 _fileManager.Dispose();
             });
+        }
+
+        [Test]
+        public void CanGetLastBlockId()
+        {
+            var filename = RandomFilename;
+            var lastBlockId1 = _fileManager.LastBlockId(filename);
+
+            var canAppend1 = _fileManager.Append(filename, out var _);
+            var lastBlockId2 = _fileManager.LastBlockId(filename);
+
+            var canAppend2 = _fileManager.Append(filename, out var _);
+            var lastBlockId3 = _fileManager.LastBlockId(filename);
+
+            Assert.True(canAppend1);
+            Assert.True(canAppend2);
+            Assert.AreEqual(0, lastBlockId1);
+            Assert.AreEqual(0, lastBlockId2);
+            Assert.AreEqual(1, lastBlockId3);
         }
 
         [TearDown]

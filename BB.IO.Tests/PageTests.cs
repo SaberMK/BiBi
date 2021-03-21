@@ -3,6 +3,7 @@ using BB.IO.Primitives;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace BB.IO.Tests
@@ -361,6 +362,55 @@ namespace BB.IO.Tests
             });
         }
 
-        private string RandomFilename => $"DBs/temp/{Guid.NewGuid()}.bin";
+        [Test]
+        public void CanCreateEmptyPage()
+        {
+            var page = _fileManager.ResolvePage();
+
+            Assert.IsNotNull(page);
+            Assert.AreEqual(_fileManager.BlockSize, page.PageSize);
+        }
+
+        [Test]
+        public void CanWritePageToDisk()
+        {
+            var filename = RandomFilename;
+            var block = new Block(filename, 0);
+            var page = _fileManager.ResolvePage(block);
+
+            page.SetInt(0, 123);
+            page.Write(block);
+
+            var pageBuffer = page.Data;
+            var canReadPage = _fileManager.Read(block, out var buffer);
+
+            Assert.True(canReadPage);
+            for(var i = 0; i < buffer.Length; ++i)
+            {
+                Assert.AreEqual(pageBuffer[i], buffer[i]);
+            }
+        }
+
+        [Test]
+        public void CanReadPageFromDisk()
+        {
+            var filename = RandomFilename;
+            var block = new Block(filename, 0);
+            var page = _fileManager.ResolvePage(block);
+
+            page.SetInt(0, 123);
+            page.Write(block);
+
+            var pageBuffer = page.Data;
+            var canReadAsPage = page.Read(block);
+
+            Assert.True(canReadAsPage);
+            for (var i = 0; i < page.Data.Length; ++i)
+            {
+                Assert.AreEqual(pageBuffer[i], page.Data[i]);
+            }
+        }
+
+        private string RandomFilename => $"{Guid.NewGuid()}.bin";
     }
 }
