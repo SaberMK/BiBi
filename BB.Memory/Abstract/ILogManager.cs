@@ -1,12 +1,14 @@
-﻿using System;
+﻿using BB.Memory.Base;
+using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace BB.Memory.Abstract
 {
-    public interface ILogManager : IDisposable
+    public interface ILogManager
     {
-        bool Append(byte[] data, out int lsn);
-        void Flush(int lsn);
-        IEnumerator<byte[]> Enumerator();
+        public void Flush(int lsn);
+        bool Append(object[] records, out int lsn);
+        IEnumerator<BasicLogRecord> GetEnumerator();
     }
 }

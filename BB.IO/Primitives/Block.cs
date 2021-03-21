@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace BB.IO.Primitives
 {
@@ -10,7 +8,7 @@ namespace BB.IO.Primitives
         public readonly int Id { get; }
         public readonly string Filename { get; }
 
-        public Block(int id, string filename)
+        public Block(string filename, int id)
         {
             Id = id;
             Filename = filename;
@@ -31,7 +29,7 @@ namespace BB.IO.Primitives
 
         public bool Equals([AllowNull] Block other)
         {
-            if (other == null) 
+            if (other == null)
                 return false;
 
             return Id == other.Id && Filename == other.Filename;
@@ -39,6 +37,9 @@ namespace BB.IO.Primitives
 
         public override bool Equals(object obj)
         {
+            if (obj == null)
+                return false;
+
             return Equals((Block)obj);
         }
 

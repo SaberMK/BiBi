@@ -1,61 +1,72 @@
-﻿using System;
+﻿using BB.IO.Abstract;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace BB.IO.Primitives
 {
-    // TODO think about it: should all read/writes be dirty/free for race conditions?
     public struct Page
     {
-        private readonly int _blockId;
+        private readonly IFileManager _fileManager;
         private readonly int _pageSize;
+        private static readonly Encoding Encoding = Encoding.ASCII;
+
+        private Block _block;
+        private byte[] _data;
         private int _position;
-
-        internal byte[] _data;
-
         internal ReadOnlySpan<byte> Data => _data;
-        public int BlockId => _blockId;
+
         public int PageSize => _pageSize;
+        public Block Block => _block;
 
-        public int Position
+        public Page(FileManager fileManager, Block block, int pageSize)
         {
-            get { return _position; }
-            set 
-            {
-                if (value < 0 || value > _pageSize)
-                    _position = 0;
-                else
-                    _position = value;
-            }
-        }
-
-
-        public static readonly Encoding Encoding = Encoding.ASCII;
-
-        public Page(int blockId, int pageSize)
-        {
-            _blockId = blockId;
+            _fileManager = fileManager;
+            _position = 0;
+            _block = block;
+            _pageSize = pageSize;
             _data = new byte[pageSize];
-            _pageSize = _data.Length;
-            _position = 0;
         }
 
-        internal Page(int blockId, byte[] data)
+        internal Page(FileManager fileManager)
         {
-            _blockId = blockId;
-            _data = data;
-            _pageSize = _data.Length;
+            _fileManager = fileManager;
             _position = 0;
+            _block = default;
+            _pageSize = fileManager.BlockSize;
+            _data = new byte[_pageSize];
         }
 
-        internal void SetContent(byte[] data)
-            => _data = data;
+        internal Page(FileManager fileManager, Block block, byte[] data)
+        {
+            _fileManager = fileManager;
+            _position = 0;
+            _block = block;
+            _pageSize = data.Length;
+            _data = data;
+        }
+
+        public bool Read(Block block)
+        {
+            _block = block;
+            return _fileManager.Read(block, out _data);
+        }
+
+        public bool Write(Block block)
+        {
+            return _fileManager.Write(block, _data);
+        }
+
+        public bool Append(string filename, out Block block)
+        {
+            return _fileManager.Append(filename, out block);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool SetInt(int offset, int value)
         {
-            if(offset < 0 
+            if (offset < 0
                 || offset + sizeof(int) > _pageSize)
             {
                 return false;
@@ -66,20 +77,10 @@ namespace BB.IO.Primitives
             return true;
         }
 
-        public bool SetInt(int value)
-        {
-            var result = SetInt(_position, value);
-
-            if (result)
-                _position += sizeof(int);
-
-            return result;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetInt(int offset, out int value)
         {
-            if(offset < 0 || offset > _pageSize)
+            if (offset < 0 || offset > _pageSize)
             {
                 value = default;
                 return false;
@@ -87,16 +88,6 @@ namespace BB.IO.Primitives
 
             value = BitConverter.ToInt32(_data, offset);
             return true;
-        }
-
-        public bool GetInt(out int value)
-        {
-            var result = GetInt(_position, out value);
-
-            if (result)
-                _position += sizeof(int);
-
-            return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -112,16 +103,6 @@ namespace BB.IO.Primitives
             return true;
         }
 
-        public bool SetBool(bool value)
-        {
-            var result = SetBool(_position, value);
-
-            if (result)
-                _position += sizeof(bool);
-
-            return result;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetBool(int offset, out bool value)
         {
@@ -133,16 +114,6 @@ namespace BB.IO.Primitives
 
             value = _data[offset] > 0;
             return true;
-        }
-
-        public bool GetBool(out bool value)
-        {
-            var result = GetBool(_position, out value);
-
-            if (result)
-                _position += sizeof(bool);
-
-            return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -159,16 +130,6 @@ namespace BB.IO.Primitives
             return true;
         }
 
-        public bool SetByte(byte value)
-        {
-            var result = SetInt(_position, value);
-
-            if (result)
-                _position += sizeof(byte);
-
-            return result;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetByte(int offset, out byte value)
         {
@@ -182,14 +143,19 @@ namespace BB.IO.Primitives
             return true;
         }
 
-        public bool GetByte(out byte value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool SetBlob(int offset, byte[] blob)
         {
-            var result = GetByte(_position, out value);
+            if (offset < 0 || offset + blob.Length + sizeof(uint) > _pageSize)
+            {
+                return false;
+            }
 
-            if (result)
-                _position += sizeof(byte);
+            var blobLength = BitConverter.GetBytes((uint)blob.Length);
+            Array.Copy(blobLength, 0, _data, offset, blobLength.Length);
 
-            return result;
+            Array.Copy(blob, 0, _data, offset + sizeof(uint), blob.Length);
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -208,40 +174,20 @@ namespace BB.IO.Primitives
             return true;
         }
 
-        public bool GetBlob(out byte[] value)
-        {
-            var result = GetBlob(_position, out value);
-            if (!result)
-                return false;
-
-            _position += value.Length + sizeof(uint);
-            return true;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool SetBlob(int offset, byte[] blob)
+        public bool SetString(int offset, string value)
         {
-            if(offset < 0 || offset + blob.Length + sizeof(uint) > _pageSize)
+            if (offset < 0
+                || offset + value.Length + sizeof(uint) > _pageSize)
             {
                 return false;
             }
 
-            var blobLength = BitConverter.GetBytes((uint)blob.Length);
+            var blobLength = BitConverter.GetBytes((uint)value.Length);
             Array.Copy(blobLength, 0, _data, offset, blobLength.Length);
 
-            Array.Copy(blob, 0, _data, offset + sizeof(uint), blob.Length);
+            Array.Copy(Encoding.GetBytes(value), 0, _data, offset + sizeof(uint), value.Length);
             return true;
-        }
-
-
-        public bool SetBlob(byte[] blob)
-        {
-            var result = SetBlob(_position, blob);
-
-            if (result)
-                _position += sizeof(int) + blob.Length;
-
-            return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -259,42 +205,6 @@ namespace BB.IO.Primitives
             return true;
         }
 
-        public bool GetString(out string value)
-        { 
-            var result = GetString(_position, out value);
-            if (!result)
-                return false;
-
-            _position += value.Length + sizeof(int);
-            return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool SetString(int offset, string value)
-        {
-            if(offset < 0 
-                || offset + value.Length + sizeof(uint) > _pageSize)
-            {
-                return false;
-            }
-
-            var blobLength = BitConverter.GetBytes((uint)value.Length);
-            Array.Copy(blobLength, 0, _data, offset, blobLength.Length);
-
-            Array.Copy(Encoding.GetBytes(value), 0, _data, offset + sizeof(uint), value.Length);
-            return true;
-        }
-
-        public bool SetString(string value)
-        {
-            var result = SetString(_position, value);
-
-            if (result)
-                _position += sizeof(int) + value.Length;
-
-            return result;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool SetDate(int offset, DateTime value)
         {
@@ -310,16 +220,6 @@ namespace BB.IO.Primitives
             return true;
         }
 
-        public bool SetDate(DateTime value)
-        {
-            var result = SetDate(_position, value);
-
-            if (result)
-                _position += sizeof(long);
-
-            return result;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetDate(int offset, out DateTime value)
         {
@@ -333,16 +233,6 @@ namespace BB.IO.Primitives
             Array.Copy(_data, offset, bytes, 0, sizeof(long));
             value = DateTime.FromBinary(BitConverter.ToInt64(bytes));
             return true;
-        }
-
-        public bool GetDate(out DateTime value)
-        {
-            var result = GetDate(_position, out value);
-
-            if (result)
-                _position += sizeof(long);
-
-            return result;
         }
     }
 }

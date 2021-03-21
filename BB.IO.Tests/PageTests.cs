@@ -1,33 +1,50 @@
+﻿using BB.IO.Abstract;
 using BB.IO.Primitives;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace BB.IO.Tests
 {
     public class PageTests
     {
+        private IFileManager _fileManager;
+
+        [SetUp]
+        public void Setup()
+        {
+            _fileManager = new FileManager("temp", "DBs", 100);
+        }
+
         [Test]
         public void CanCreatePageWithSize()
         {
-            var page = new Page(0, 100);
+            var filename = RandomFilename;
+            var page = _fileManager.ResolvePage(new Block(filename, 0));
 
             Assert.IsNotNull(page);
-            Assert.AreEqual(0, page.BlockId);
+            Assert.AreEqual(0, page.Block.Id);
+            Assert.AreEqual(filename, page.Block.Filename);
             Assert.AreEqual(100, page.PageSize);
         }
 
         [Test]
         public void CanCreatePageFromExistingByteArray()
         {
+            var filename = RandomFilename;
+
             var data = new byte[100];
             data[0] = 1;
             data[1] = 2;
             data[99] = 3;
 
-            var page = new Page(0, data);
+            var page = _fileManager.ResolvePage(new Block(filename, 0), data);
 
             Assert.IsNotNull(page);
-            Assert.AreEqual(0, page.BlockId);
+            Assert.AreEqual(0, page.Block.Id);
+            Assert.AreEqual(filename, page.Block.Filename);
             Assert.AreEqual(100, page.PageSize);
             Assert.AreEqual(data.Length, page.Data.Length);
             Assert.AreEqual(data[0], page.Data[0]);
@@ -39,16 +56,18 @@ namespace BB.IO.Tests
         [Test]
         public void CanWriteBool()
         {
-            var page = new Page(0, 100);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
             page.SetBool(0, true);
+            page.SetBool(1, false);
 
             Assert.GreaterOrEqual(page.Data[0], 1);
+            Assert.AreEqual(0, page.Data[1]);
         }
 
         [Test]
         public void CanReadBool()
         {
-            var page = new Page(0, 100);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
             page.SetBool(0, true);
             var result = page.GetBool(0, out var value);
 
@@ -59,7 +78,7 @@ namespace BB.IO.Tests
         [Test]
         public void CanWriteByte()
         {
-            var page = new Page(0, 100);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
             page.SetByte(0, 123);
 
             Assert.AreEqual(123, page.Data[0]);
@@ -68,7 +87,7 @@ namespace BB.IO.Tests
         [Test]
         public void CanReadByte()
         {
-            var page = new Page(0, 100);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
             page.SetByte(0, 123);
             var result = page.GetByte(0, out var value);
 
@@ -79,7 +98,7 @@ namespace BB.IO.Tests
         [Test]
         public void CanWriteInt()
         {
-            var page = new Page(0, 100);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
             page.SetInt(0, 123);
 
             Assert.AreEqual(123, page.Data[0]);
@@ -88,7 +107,7 @@ namespace BB.IO.Tests
         [Test]
         public void CanReadInt()
         {
-            var page = new Page(0, 100);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
             page.SetInt(0, 123);
             var result = page.GetInt(0, out var value);
 
@@ -99,7 +118,7 @@ namespace BB.IO.Tests
         [Test]
         public void CanWriteBlob()
         {
-            var page = new Page(0, 100);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
             var blob = new byte[] { 1, 2, 3 };
             page.SetBlob(0, blob);
 
@@ -112,7 +131,7 @@ namespace BB.IO.Tests
         [Test]
         public void CanReadBlob()
         {
-            var page = new Page(0, 100);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
             var blob = new byte[] { 1, 2, 3 };
             page.SetBlob(0, blob);
             var result = page.GetBlob(0, out var value);
@@ -128,7 +147,7 @@ namespace BB.IO.Tests
         [Test]
         public void CanReadAndWriteString()
         {
-            var page = new Page(0, 100);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
             var str = "greeting";
             page.SetString(0, str);
             var result = page.GetString(0, out var value);
@@ -141,7 +160,7 @@ namespace BB.IO.Tests
         [Test]
         public void CanReadAndWriteDateTime()
         {
-            var page = new Page(0, 100);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
             var datetime = new DateTime(2020, 1, 1);
             page.SetDate(0, datetime);
             var result = page.GetDate(0, out var value);
@@ -152,180 +171,260 @@ namespace BB.IO.Tests
         }
 
         [Test]
-        public void SequentialIntReadAndWrite()
+        public void CannotSetIntIfOutOfRange()
         {
-            var page = new Page(0, 100);
-            var int1 = 123;
-            var int2 = 456;
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
 
-            page.Position = 0;
-            page.SetInt(int1);
-            page.SetInt(int2);
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.SetInt(-1, 1);
+                var canSet2 = page.SetInt(page.PageSize + 1, 1);
 
-            page.Position = 0;
-
-            var int1Result = page.GetInt(out var int1ResultValue);
-            var int2Result = page.GetInt(out var int2ResultValue);
-
-            Assert.IsTrue(int1Result);
-            Assert.IsTrue(int2Result);
-            Assert.AreEqual(int1, int1ResultValue);
-            Assert.AreEqual(int2, int2ResultValue);
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+            });
         }
 
         [Test]
-        public void SequentialByteReadAndWrite()
+        public void CannotGetIntIfOutOfRange()
         {
-            var page = new Page(0, 100);
-            var var1 = (byte)123;
-            var var2 = (byte)211;
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
 
-            page.Position = 0;
-            page.SetByte(var1);
-            page.SetByte(var2);
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.GetInt(-1, out var value1);
+                var canSet2 = page.GetInt(page.PageSize + 1, out var value2);
 
-            page.Position = 0;
-
-            var var1Result = page.GetByte(out var var1ResultValue);
-            var var2Result = page.GetByte(out var var2ResultValue);
-
-            Assert.IsTrue(var1Result);
-            Assert.IsTrue(var2Result);
-            Assert.AreEqual(var1, var1ResultValue);
-            Assert.AreEqual(var2, var2ResultValue);
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+                Assert.AreEqual(default(int), value1);
+                Assert.AreEqual(default(int), value2);
+            });
         }
 
         [Test]
-        public void SequentialBoolReadAndWrite()
+        public void CannotSetStringIfOutOfRange()
         {
-            var page = new Page(0, 100);
-            var var1 = true;
-            var var2 = false;
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
 
-            page.Position = 0;
-            page.SetBool(var1);
-            page.SetBool(var2);
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.SetString(-1, "abc");
+                var canSet2 = page.SetString(page.PageSize + 1, "abc");
 
-            page.Position = 0;
-
-            var var1Result = page.GetBool(out var var1ResultValue);
-            var var2Result = page.GetBool(out var var2ResultValue);
-
-            Assert.IsTrue(var1Result);
-            Assert.IsTrue(var2Result);
-            Assert.AreEqual(var1, var1ResultValue);
-            Assert.AreEqual(var2, var2ResultValue);
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+            });
         }
 
         [Test]
-        public void SequentialBlobReadAndWrite()
+        public void CannotGetStringIfOutOfRange()
         {
-            var page = new Page(0, 100);
-            var var1 = new byte[] { 1, 2, 3 };
-            var var2 = new byte[] { 4, 5, 6 };
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
 
-            page.Position = 0;
-            page.SetBlob(var1);
-            page.SetBlob(var2);
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.GetString(-1, out var value1);
+                var canSet2 = page.GetString(page.PageSize + 1, out var value2);
 
-            page.Position = 0;
-
-            var var1Result = page.GetBlob(out var var1ResultValue);
-            var var2Result = page.GetBlob(out var var2ResultValue);
-
-            Assert.IsTrue(var1Result);
-            Assert.IsTrue(var2Result);
-            Assert.AreEqual(var1, var1ResultValue);
-            Assert.AreEqual(var2, var2ResultValue);
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+                Assert.AreEqual(default(string), value1); 
+                Assert.AreEqual(default(string), value2);
+            });
         }
 
         [Test]
-        public void SequentialStringReadAndWrite()
+        public void CannotSetDateIfOutOfRange()
         {
-            var page = new Page(0, 100);
-            var var1 = "hello";
-            var var2 = "world";
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
 
-            page.Position = 0;
-            page.SetString(var1);
-            page.SetString(var2);
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.SetDate(-1, new DateTime(2020, 1, 1));
+                var canSet2 = page.SetDate(page.PageSize + 1, new DateTime(2020, 1, 1));
 
-            page.Position = 0;
-
-            var var1Result = page.GetString(out var var1ResultValue);
-            var var2Result = page.GetString(out var var2ResultValue);
-
-            Assert.IsTrue(var1Result);
-            Assert.IsTrue(var2Result);
-            Assert.AreEqual(var1, var1ResultValue);
-            Assert.AreEqual(var2, var2ResultValue);
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+            });
         }
 
         [Test]
-        public void SequentialDateTimeReadAndWrite()
+        public void CannotGetDateIfOutOfRange()
         {
-            var page = new Page(0, 100);
-            var var1 = new DateTime(2020, 1, 1);
-            var var2 = new DateTime(2000, 3, 3);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
 
-            page.Position = 0;
-            page.SetDate(var1);
-            page.SetDate(var2);
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.GetDate(-1, out var value1);
+                var canSet2 = page.GetDate(page.PageSize + 1, out var value2);
 
-            page.Position = 0;
-
-            var var1Result = page.GetDate(out var var1ResultValue);
-            var var2Result = page.GetDate(out var var2ResultValue);
-
-            Assert.IsTrue(var1Result);
-            Assert.IsTrue(var2Result);
-            Assert.AreEqual(var1, var1ResultValue);
-            Assert.AreEqual(var2, var2ResultValue);
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+                Assert.AreEqual(default(DateTime), value1);
+                Assert.AreEqual(default(DateTime), value2);
+            });
         }
 
         [Test]
-        public void SequentialReadsAndWrites()
+        public void CannotSetByteIfOutOfRange()
         {
-            var page = new Page(0, 1000);
-            var intValue = 123;
-            var byteValue = (byte)99;
-            var boolValue = true;
-            var blobValue = new byte[] { 1, 2, 3 };
-            var stringValue = "temp string";
-            var dateValue = new DateTime(2020, 1, 1);
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
 
-            // Not nessesary, just to make it clear where we starts
-            page.Position = 0;
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.SetByte(-1, 1);
+                var canSet2 = page.SetByte(page.PageSize + 1, 1);
 
-            page.SetInt(intValue);
-            page.SetByte(byteValue);
-            page.SetBool(boolValue);
-            page.SetBlob(blobValue);
-            page.SetString(stringValue);
-            page.SetDate(dateValue);
-
-            page.Position = 0;
-            var intResult = page.GetInt(out var resultIntValue);
-            var byteResult = page.GetByte(out var resultByteValue);
-            var boolResult = page.GetBool(out var resultBoolValue);
-            var blobResult = page.GetBlob(out var resultBlobValue);
-            var stringResult = page.GetString(out var resultStringValue);
-            var dateResult = page.GetDate(out var resultDateValue);
-
-            Assert.IsTrue(intResult);
-            Assert.AreEqual(intValue, resultIntValue);
-            Assert.IsTrue(byteResult);
-            Assert.AreEqual(byteValue, resultByteValue);
-            Assert.IsTrue(boolResult);
-            Assert.AreEqual(boolValue, resultBoolValue);
-            Assert.IsTrue(byteResult);
-            Assert.AreEqual(byteValue, resultByteValue);
-            Assert.IsTrue(blobResult);
-            Assert.AreEqual(blobValue, resultBlobValue);
-            Assert.IsTrue(stringResult);
-            Assert.AreEqual(stringValue, resultStringValue);
-            Assert.IsTrue(dateResult);
-            Assert.AreEqual(dateValue, resultDateValue);
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+            });
         }
+
+        [Test]
+        public void CannotGetByteIfOutOfRange()
+        {
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
+
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.GetByte(-1, out var value1);
+                var canSet2 = page.GetByte(page.PageSize + 1, out var value2);
+
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+                Assert.AreEqual(default(byte), value1);
+                Assert.AreEqual(default(byte), value2);
+            });
+        }
+
+        [Test]
+        public void CannotSetBoolIfOutOfRange()
+        {
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
+
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.SetBool(-1, true);
+                var canSet2 = page.SetBool(page.PageSize + 1, true);
+
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+            });
+        }
+
+        [Test]
+        public void CannotGetBoolIfOutOfRange()
+        {
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
+
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.GetBool(-1, out var value1);
+                var canSet2 = page.GetBool(page.PageSize + 1, out var value2);
+
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+                Assert.AreEqual(default(bool), value1);
+                Assert.AreEqual(default(bool), value2);
+            });
+        }
+
+        [Test]
+        public void CannotSetBlobIfOutOfRange()
+        {
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
+
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.SetBlob(-1, new byte[] { 1, 2 });
+                var canSet2 = page.SetBlob(page.PageSize + 1, new byte[] { 1, 2 });
+
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+            });
+        }
+
+        [Test]
+        public void CannotGetBlobIfOutOfRange()
+        {
+            var page = _fileManager.ResolvePage(new Block(RandomFilename, 0));
+
+            Assert.DoesNotThrow(() =>
+            {
+                var canSet1 = page.GetBlob(-1, out var value1);
+                var canSet2 = page.GetBlob(page.PageSize + 1, out var value2);
+
+                Assert.False(canSet1);
+                Assert.False(canSet2);
+                Assert.AreEqual(default(byte[]), value1);
+                Assert.AreEqual(default(byte[]), value2);
+            });
+        }
+
+        [Test]
+        public void CanCreateEmptyPage()
+        {
+            var page = _fileManager.ResolvePage();
+
+            Assert.IsNotNull(page);
+            Assert.AreEqual(_fileManager.BlockSize, page.PageSize);
+        }
+
+        [Test]
+        public void CanWritePageToDisk()
+        {
+            var filename = RandomFilename;
+            var block = new Block(filename, 0);
+            var page = _fileManager.ResolvePage(block);
+
+            page.SetInt(0, 123);
+            page.Write(block);
+
+            var pageBuffer = page.Data;
+            var canReadPage = _fileManager.Read(block, out var buffer);
+
+            Assert.True(canReadPage);
+            for(var i = 0; i < buffer.Length; ++i)
+            {
+                Assert.AreEqual(pageBuffer[i], buffer[i]);
+            }
+        }
+
+        [Test]
+        public void CanReadPageFromDisk()
+        {
+            var filename = RandomFilename;
+            var block = new Block(filename, 0);
+            var page = _fileManager.ResolvePage(block);
+
+            page.SetInt(0, 123);
+            page.Write(block);
+
+            var pageBuffer = page.Data;
+            var canReadAsPage = page.Read(block);
+
+            Assert.True(canReadAsPage);
+            for (var i = 0; i < page.Data.Length; ++i)
+            {
+                Assert.AreEqual(pageBuffer[i], page.Data[i]);
+            }
+        }
+
+        [Test]
+        public void CanAppendPage()
+        {
+            var filename = RandomFilename;
+            var block1 = new Block(filename, 0);
+            var page = _fileManager.ResolvePage(block1);
+            page.Write(block1);
+            var canAppend = page.Append(filename, out var block2);
+
+            Assert.True(canAppend);
+            Assert.AreEqual(1, block2.Id);
+            Assert.AreEqual(filename, block2.Filename);
+        }
+
+        private string RandomFilename => $"{Guid.NewGuid()}.bin";
     }
 }

@@ -7,13 +7,15 @@ namespace BB.IO.Abstract
 {
     public interface IFileManager : IDisposable
     {
-        bool Read(int blockId, out Page page);
-        bool Write(Page page);
-        Page Append();
-
-        int Length { get; }
+        bool Read(Block block, out byte[] buffer);
+        bool Write(Block block, byte[] buffer);
+        bool Append(string filename, out Block block);
+        int Length(string filename);
+        int LastBlockId(string filename);
+        Page ResolvePage(Block block);
+        Page ResolvePage(Block block, byte[] data);
+        Page ResolvePage();
+        bool IsNew { get; }
         int BlockSize { get; }
-        int LastBlockId { get; }
-        string Filename { get; }
     }
 }

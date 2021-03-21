@@ -1,5 +1,4 @@
 ﻿using BB.IO.Abstract;
-using BB.IO.Primitives;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -15,174 +14,211 @@ namespace BB.IO.Tests
         [SetUp]
         public void SetUp()
         {
-            if(!Directory.Exists("Logs"))
+            if(Directory.Exists("DBs"))
             {
-                Directory.CreateDirectory("Logs");
+                Directory.Delete("DBs", true);
             }
 
-            _fileManager = new FileManager("Logs/test.tmp", 10);
+            _fileManager = new FileManager("temp", "DBs", 100);
         }
 
         [Test]
-        public void DbFileExists()
+        public void DbFileExistsOnNewDirectory()
         {
-            Assert.IsTrue(File.Exists("Logs/test.tmp"));
+            Assert.IsTrue(Directory.Exists("DBs/temp"));
+            Assert.IsTrue(_fileManager.IsNew);
+        }
+
+        [Test]
+        public void BlockSizeIsCorrect()
+        {
+            Assert.AreEqual(100, _fileManager.BlockSize);
         }
 
         [Test]
         public void CanAppendMemoryBlock()
         {
-            var page = _fileManager.Append();
+            var filename = RandomFilename;
+            var canAppend = _fileManager.Append(filename, out var block);
 
-            Assert.IsNotNull(page);
-            Assert.AreEqual(0, page.BlockId);
-            Assert.AreEqual(10, page.PageSize);
-            Assert.AreEqual(10, page.Data.Length);
+            Assert.True(canAppend);
+            Assert.AreEqual(0, block.Id);
+            Assert.AreEqual(filename, block.Filename);
         }
 
         [Test]
         public void CanWriteMemoryBlock()
         {
-            var page = _fileManager.Append();
-            page._data[0] = 1;
-            _fileManager.Write(page);
+            var filename = RandomFilename;
+            var canAppend = _fileManager.Append(filename, out var block);
 
-            Assert.IsNotNull(page);
-            Assert.AreEqual(0, page.BlockId);
-            Assert.AreEqual(10, page.PageSize);
-            Assert.AreEqual(10, page.Data.Length);
-            Assert.AreEqual(1, page.Data[0]);
+            var buffer = new byte[_fileManager.BlockSize];
+            buffer[0] = 1;
+            var canWrite = _fileManager.Write(block, buffer);
+
+            _fileManager.Dispose();
+
+            var readData = File.ReadAllBytes($"DBs/temp/{filename}");
+
+            Assert.True(canAppend);
+            Assert.True(canWrite);
+            Assert.AreEqual(0, block.Id);
+            Assert.AreEqual(filename, block.Filename);
+
+            for(int i = 0; i < _fileManager.BlockSize; ++i)
+            {
+                Assert.AreEqual(readData[i], buffer[i]);
+            }
         }
 
         [Test]
         public void CanReadFirstMemoryBlock()
         {
-            var page = _fileManager.Append();
+            var filename = RandomFilename;
+            var canAppend = _fileManager.Append(filename, out var block);
 
-            page._data[0] = 1;
-            page._data[1] = 2;
-            page._data[9] = 3;
-
-            _fileManager.Write(page);
-
-            _fileManager.Dispose();
-
-            _fileManager = new FileManager("Logs/test.tmp", 10);
-            var readResult = _fileManager.Read(0, out var readPage);
-
-            Assert.IsTrue(readResult);
-            Assert.IsNotNull(readPage);
-            Assert.AreEqual(0, readPage.BlockId);
-            Assert.AreEqual(10, readPage.PageSize);
-            Assert.AreEqual(10, readPage.Data.Length);
-            Assert.AreEqual(1, readPage.Data[0]);
-            Assert.AreEqual(2, readPage.Data[1]);
-            Assert.AreEqual(3, readPage.Data[9]);
-        }
-
-        [Test]
-        public void CanReadNotFirstMemoryBlock()
-        {
-            var page = _fileManager.Append();
-            var newPage = _fileManager.Append();
-
-            newPage._data[0] = 1;
-            newPage._data[1] = 2;
-            newPage._data[9] = 3;
-
-            _fileManager.Write(newPage);
+            var buffer = new byte[_fileManager.BlockSize];
+            buffer[0] = 1;
+            var canWrite = _fileManager.Write(block, buffer);
 
             _fileManager.Dispose();
 
-            _fileManager = new FileManager("Logs/test.tmp", 10);
-            var readResult = _fileManager.Read(1, out var readPage);
+            _fileManager = new FileManager("temp", "DBs", 100);
+            var readResult = _fileManager.Read(block, out var buff);
 
-            Assert.IsTrue(readResult);
-            Assert.IsNotNull(readPage);
-            Assert.AreEqual(1, readPage.BlockId);
-            Assert.AreEqual(10, readPage.PageSize);
-            Assert.AreEqual(10, readPage.Data.Length);
-            Assert.AreEqual(1, readPage.Data[0]);
-            Assert.AreEqual(2, readPage.Data[1]);
-            Assert.AreEqual(3, readPage.Data[9]);
+            Assert.True(canAppend);
+            Assert.True(canWrite);
+            Assert.True(readResult);
+            Assert.AreEqual(0, block.Id);
+            Assert.AreEqual(filename, block.Filename);
+
+            for (int i = 0; i < _fileManager.BlockSize; ++i)
+            {
+                Assert.AreEqual(buffer[i], buff[i]);
+            }
         }
 
         [Test]
-        public void CannotReadInBadRange()
+        public void CanReadSeveralMemoryBlocks()
         {
-            var result = _fileManager.Read(int.MaxValue, out var page);
+            var filename = RandomFilename;
+            var canAppend1 = _fileManager.Append(filename, out var block1);
+            var canAppend2 = _fileManager.Append(filename, out var block2);
 
-            Assert.IsFalse(result);
-            Assert.AreEqual(default(Page), page);
+            var buffer1 = new byte[_fileManager.BlockSize];
+            buffer1[0] = 1;
+            var canWrite1 = _fileManager.Write(block1, buffer1);
+
+            var buffer2 = new byte[_fileManager.BlockSize];
+            buffer2[0] = 2;
+            var canWrite2 = _fileManager.Write(block2, buffer2);
+
+            _fileManager.Dispose();
+
+            _fileManager = new FileManager("temp", "DBs", 100);
+            var readResult1 = _fileManager.Read(block1, out var buff1);
+            var readResult2 = _fileManager.Read(block2, out var buff2);
+
+            Assert.True(canAppend1);
+            Assert.True(canAppend2);
+            Assert.True(canWrite1);
+            Assert.True(canWrite2);
+            Assert.True(readResult1);
+            Assert.True(readResult2);
+            Assert.AreEqual(0, block1.Id);
+            Assert.AreEqual(filename, block1.Filename);
+            Assert.AreEqual(1, block2.Id);
+            Assert.AreEqual(filename, block2.Filename);
+
+            for (int i = 0; i < _fileManager.BlockSize; ++i)
+            {
+                Assert.AreEqual(buffer1[i], buff1[i]);
+                Assert.AreEqual(buffer2[i], buff2[i]);
+            }
         }
 
         [Test]
-        public void CannotWriteInBadRange()
+        public void LengthOfAppendedNewFileEqualsToBlockSize()
         {
-            var badPage = new Page(-1, 10);
-            var result = _fileManager.Write(badPage);
+            var filename = RandomFilename;
+            var canAppend = _fileManager.Append(filename, out var block);
 
-            Assert.IsFalse(result);
+            var length = _fileManager.Length(filename);
+
+            Assert.True(canAppend);
+            Assert.AreEqual(length, _fileManager.BlockSize);
         }
 
         [Test]
-        public void CannotReadNegativeBlockId()
+        public void CannotReadInABadRange()
         {
-            var result = _fileManager.Read(int.MaxValue, out var page);
+            var filename = RandomFilename;
+            var canAppend = _fileManager.Append(filename, out var block);
 
-            Assert.IsFalse(result);
-            Assert.AreEqual(default(Page), page);
+            var canRead1 = _fileManager.Read(new Primitives.Block(filename, -1), out var buff1);
+            var canRead2 = _fileManager.Read(new Primitives.Block(filename, 100), out var buff2);
+
+            Assert.True(canAppend);
+            Assert.False(canRead1);
+            Assert.False(canRead2);
+            Assert.AreEqual(default(byte[]), buff1);
+            Assert.AreEqual(default(byte[]), buff2);
         }
 
         [Test]
-        public void CannotWriteNegativeBlockId()
+        public void CannotWriteInABadRange()
         {
-            var badPage = new Page(-1, 10);
-            var result = _fileManager.Write(badPage);
+            var filename = RandomFilename;
+            var canAppend = _fileManager.Append(filename, out var block);
 
-            Assert.IsFalse(result);
+            var buff = new byte[_fileManager.BlockSize];
+
+            var canWrite1 = _fileManager.Write(new Primitives.Block(filename, -1), buff);
+            var canWrite2 = _fileManager.Write(new Primitives.Block(filename, 100), buff);
+
+            Assert.True(canAppend);
+            Assert.False(canWrite1);
+            Assert.False(canWrite2);
         }
 
         [Test]
-        public void CannotWritePageWithPageSizeNotEqualToManagerBlockSize()
+        public void CanDisposeFileManagerWithOpenedFiles()
         {
-            var badPage = new Page(0, 19);
-            var result = _fileManager.Write(badPage);
-
-            Assert.IsFalse(result);
+            Assert.DoesNotThrow(() =>
+            {
+                var filename = RandomFilename;
+                var canAppend = _fileManager.Append(filename, out var block);
+                _fileManager.Dispose();
+            });
         }
 
         [Test]
-        public void EmptyManagerHasZeroLengthAndBlockSizeAndLastBlockId()
+        public void CanGetLastBlockId()
         {
-            var length = _fileManager.Length;
-            var blockSize = _fileManager.BlockSize;
-            var lastBlockId = _fileManager.LastBlockId;
+            var filename = RandomFilename;
+            var lastBlockId1 = _fileManager.LastBlockId(filename);
 
-            Assert.AreEqual(0, length);
-            Assert.AreEqual(10, blockSize);
-            Assert.AreEqual(0, lastBlockId);
-        }
+            var canAppend1 = _fileManager.Append(filename, out var _);
+            var lastBlockId2 = _fileManager.LastBlockId(filename);
 
-        [Test]
-        public void ManagerWithFilledPageHasCorrectLengthAndBlockSizeAndLastBlockId()
-        {
-            _ = _fileManager.Append();
+            var canAppend2 = _fileManager.Append(filename, out var _);
+            var lastBlockId3 = _fileManager.LastBlockId(filename);
 
-            var length = _fileManager.Length;
-            var blockSize = _fileManager.BlockSize;
-            var lastBlockId = _fileManager.LastBlockId;
-
-            Assert.AreEqual(1 * 10, length);
-            Assert.AreEqual(10, blockSize);
-            Assert.AreEqual(0, lastBlockId);
+            Assert.True(canAppend1);
+            Assert.True(canAppend2);
+            Assert.AreEqual(0, lastBlockId1);
+            Assert.AreEqual(0, lastBlockId2);
+            Assert.AreEqual(1, lastBlockId3);
         }
 
         [TearDown]
         public void TearDown()
         {
-            _fileManager?.Dispose();
-            Directory.Delete("Logs", true);
+            // Not using ?. because code coverage doesn't like it
+            if (_fileManager != null)
+                _fileManager.Dispose();
         }
+
+        private string RandomFilename => $"{Guid.NewGuid()}.bin";
     }
 }

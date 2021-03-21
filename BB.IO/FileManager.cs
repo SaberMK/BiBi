@@ -1,99 +1,166 @@
 ﻿using BB.IO.Abstract;
 using BB.IO.Primitives;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace BB.IO
 {
-    public class FileManager : IFileManager, IDisposable
+    public class FileManager : IFileManager
     {
-        private string _filename;
-        private int _blockSize;
-        private FileStream _stream;
+        private readonly DirectoryInfo _dbDirectory;
+        private readonly bool _isNew;
+        private readonly int _blockSize;
+        private ConcurrentDictionary<string, FileStream> _openedFiles = new ConcurrentDictionary<string, FileStream>();
 
-        public FileManager(string filename, int blockSize)
+        public FileManager(string dbName, string dbsDirectory, int blockSize)
         {
-            _filename = Path.GetFileName(filename);
             _blockSize = blockSize;
 
-            _stream = new FileStream(
-                filename, 
-                FileMode.OpenOrCreate, 
-                FileAccess.ReadWrite, 
-                FileShare.None, 
-                _blockSize, 
-                FileOptions.WriteThrough);
-        }
-
-        // Should we lock on read?
-        public bool Read(int blockId, out Page page)
-        {
-            var pagePosition = blockId * _blockSize;
-
-            // Out of range
-            if (blockId < 0 
-                || pagePosition < 0 
-                ||_stream.Length < pagePosition)
+            if (!Directory.Exists(dbsDirectory))
             {
-                page = default(Page);
-                return false;
+                Directory.CreateDirectory(dbsDirectory);
             }
 
-            var data = new byte[_blockSize];
-
-            _stream.Position = pagePosition;
-            _stream.Read(data, 0, _blockSize);
-
-            page = new Page(blockId, data);
-            return true;
-        }
-
-        public bool Write(Page page)
-        {
-            var pagePosition = page.BlockId * _blockSize;
-
-            // Out of range
-            if (page.BlockId < 0 
-                || pagePosition < 0 
-                || _stream.Length < pagePosition
-                || page.PageSize != _blockSize)
-            {
-                return false;
-            }
-
-            _stream.Position = pagePosition;
-            _stream.Write(page._data, 0, page.PageSize);
+            var dbPath = Path.Combine(dbsDirectory, dbName);
             
+            _isNew = !Directory.Exists(dbPath);
+            if (_isNew)
+            {
+                _dbDirectory = Directory.CreateDirectory(dbPath);
+            }
+            else
+            {
+                _dbDirectory = new DirectoryInfo(dbPath);
+            }
+        }
+
+        public bool Read(Block block, out byte[] buffer)
+        {
+            var file = GetFile(block.Filename);
+
+            lock (file)
+            {
+                var pagePosition = block.Id * _blockSize;
+
+                // Out of range
+                if (block.Id < 0
+                    || pagePosition < 0
+                    || file.Length < pagePosition)
+                {
+                    buffer = default;
+                    return false;
+                }
+
+                buffer = new byte[_blockSize];
+                file.Position = pagePosition;
+                file.Read(buffer, 0, _blockSize);
+
+            }
 
             return true;
         }
 
-        public Page Append()
+        public bool Write(Block block, byte[] buffer)
         {
-            var length = (int)_stream.Length;
-            var newBlockId = length == 0 ? 0 : (length/ _blockSize);
-            var data = new byte[_blockSize];
+            var file = GetFile(block.Filename);
 
-            _stream.Position = newBlockId * _blockSize;
-            _stream.Write(data, 0, _blockSize);            
+            lock (file)
+            {
+                var pagePosition = block.Id * _blockSize;
 
-            return new Page(newBlockId, data);
+                if (block.Id < 0
+                    || pagePosition < 0
+                    || file.Length < pagePosition)
+                {
+                    return false;
+                }
+
+                file.Position = pagePosition;
+                file.Write(buffer, 0, _blockSize);
+            }
+
+            return true;
         }
 
-        public int Length => (int)_stream.Length;
+        public bool Append(string filename, out Block block)
+        {
+            var file = GetFile(filename);
 
-        public int BlockSize => _blockSize;
+            lock (file)
+            {
+                var length = (int)file.Length;
+                var newBlockId = length == 0 ? 0 : (length / _blockSize);
+                var data = new byte[_blockSize];
 
-        // because there are i.e. THREE blocks but block is SECOND
-        public int LastBlockId => Length == 0 ? 0 : (Length / _blockSize) - 1;
+                file.Position = newBlockId * _blockSize;
+                file.Write(data, 0, _blockSize);
 
-        public string Filename => _filename;
+                block = new Block(filename, newBlockId);
+            }
+            
+            return true;
+        }
+
+        public int Length(string filename)
+        {
+            var file = GetFile(filename);
+            return (int)file.Length;
+        }
+
+        public int LastBlockId(string filename)
+        {
+            var file = GetFile(filename);
+            return file.Length == 0 ? 0 : ((int)file.Length / _blockSize) - 1;
+        }
+
+        public Page ResolvePage(Block block)
+        {
+            return new Page(this, block, _blockSize);
+        }
+
+        public Page ResolvePage(Block block, byte[] data)
+        {
+            return new Page(this, block, data);
+        }
+
+        public Page ResolvePage()
+        {
+            return new Page(this);
+        }
 
         public void Dispose()
         {
-            _stream.Dispose();
+            var filesToClose = _openedFiles.Values;
+            foreach(var file in filesToClose)
+            {
+                file.Close();
+            }
+        }
+
+        public bool IsNew => _isNew;
+
+        public int BlockSize => _blockSize;
+
+        private FileStream GetFile(string filename)
+        {
+            var hasFile = _openedFiles.TryGetValue(filename, out var file);
+
+            if (hasFile)
+                return file;
+
+            file = new FileStream(
+                Path.Combine(_dbDirectory.FullName, filename),
+                FileMode.OpenOrCreate,
+                FileAccess.ReadWrite,
+                FileShare.None,
+                _blockSize,
+                FileOptions.WriteThrough);
+
+            _openedFiles.TryAdd(filename, file);
+            return file;
         }
     }
 }
