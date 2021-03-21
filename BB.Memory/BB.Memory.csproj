@@ -14,4 +14,10 @@
 			<_Parameter1>BB.Memory.Tests</_Parameter1>
 		</AssemblyAttribute>
 	</ItemGroup>
+
+
+	<ItemGroup>
+	  <Folder Include="Buffer\" />
+	  <Folder Include="Exceptions\" />
+	</ItemGroup>
 </Project>

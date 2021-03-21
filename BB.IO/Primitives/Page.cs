@@ -49,12 +49,18 @@ namespace BB.IO.Primitives
 
         public bool Read(Block block)
         {
+            _block = block;
             return _fileManager.Read(block, out _data);
         }
 
         public bool Write(Block block)
         {
             return _fileManager.Write(block, _data);
+        }
+
+        public bool Append(string filename, out Block block)
+        {
+            return _fileManager.Append(filename, out block);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

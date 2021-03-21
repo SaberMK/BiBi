@@ -411,6 +411,20 @@ namespace BB.IO.Tests
             }
         }
 
+        [Test]
+        public void CanAppendPage()
+        {
+            var filename = RandomFilename;
+            var block1 = new Block(filename, 0);
+            var page = _fileManager.ResolvePage(block1);
+            page.Write(block1);
+            var canAppend = page.Append(filename, out var block2);
+
+            Assert.True(canAppend);
+            Assert.AreEqual(1, block2.Id);
+            Assert.AreEqual(filename, block2.Filename);
+        }
+
         private string RandomFilename => $"{Guid.NewGuid()}.bin";
     }
 }
