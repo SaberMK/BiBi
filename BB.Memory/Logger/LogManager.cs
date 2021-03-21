@@ -163,7 +163,6 @@ namespace BB.Memory.Logger
 
         private void AppendNewBlock()
         {
-            LastRecordPosition = sizeof(int);
             _ = _page.Append(_logFilename, out _currentBlock);
             _currentPosition = sizeof(int);
         }
