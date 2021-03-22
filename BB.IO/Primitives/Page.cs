@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BB.IO.Primitives
 {
-    public struct Page
+    public class Page
     {
         private readonly IFileManager _fileManager;
         private readonly int _pageSize;
