@@ -31,10 +31,8 @@ namespace BB.Memory.Logger
         {
             get
             {
-                if (_currentRecord == 0)
-                    MoveToNextBlock();
-
-                return new BasicLogRecord(_page, _currentRecord);
+                _page.GetInt(_currentRecord, out var position);
+                return new BasicLogRecord(_page, position + sizeof(int));
             }
         }
 
@@ -49,7 +47,14 @@ namespace BB.Memory.Logger
             if (_currentRecord == 0)
                 MoveToNextBlock();
 
-            _ = _page.GetInt(LogManager.LAST_ENTRY_STORAGE_POSITION, out _currentRecord);
+            _ = _page.GetInt(_currentRecord, out _currentRecord);
+
+            if (_currentRecord == 0 && _block.Id == 0)
+                return false;
+
+            if (_currentRecord == 0)
+                MoveToNextBlock();
+
             return true;
         }
 

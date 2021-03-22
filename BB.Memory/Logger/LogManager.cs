@@ -51,7 +51,7 @@ namespace BB.Memory.Logger
         {
             lsn = 0;
 
-            var totalRecordSize = sizeof(int);
+            var totalRecordSize = 0;
             foreach(var entry in records)
             {
                 var size = Size(entry);
@@ -62,10 +62,10 @@ namespace BB.Memory.Logger
                 totalRecordSize += Size(entry);
             }
 
-            if (totalRecordSize >= _fileManager.BlockSize)
+            if (totalRecordSize + sizeof(int) >= _fileManager.BlockSize)
                 return false;
 
-            if(totalRecordSize + _currentPosition >= _fileManager.BlockSize)
+            if(totalRecordSize + _currentPosition + sizeof(int) >= _fileManager.BlockSize)
             {
                 Flush();
                 AppendNewBlock();
@@ -164,6 +164,7 @@ namespace BB.Memory.Logger
         private void AppendNewBlock()
         {
             _ = _page.Append(_logFilename, out _currentBlock);
+            _ = _page.Read(_currentBlock);
             _currentPosition = sizeof(int);
         }
 
@@ -183,7 +184,7 @@ namespace BB.Memory.Logger
             }
             set
             {
-                _ = _page.SetInt(LastRecordPosition, value);
+                _ = _page.SetInt(LAST_ENTRY_STORAGE_POSITION, value);
             }
         }
     }
