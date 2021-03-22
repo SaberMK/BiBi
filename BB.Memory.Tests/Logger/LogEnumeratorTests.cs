@@ -192,7 +192,7 @@ namespace BB.Memory.Tests.Logger
             var storageString = "London is the capital of GB";
             var filename = RandomFilename;
             _logManager = new LogManager(_fileManager, filename);
-            var canAppe`nd = _logManager.Append(new object[] { 1, 2, storageString }, out var lsn);
+            var canAppend = _logManager.Append(new object[] { 1, 2, storageString }, out var lsn);
             var canAppend2 = _logManager.Append(new object[] { 3, 4, storageString }, out var lsn2);
             var canAppend3 = _logManager.Append(new object[] { 5, 6, storageString }, out var lsn3);
 
