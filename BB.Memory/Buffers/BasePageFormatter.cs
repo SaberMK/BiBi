@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BB.Memory.Buffer
+namespace BB.Memory.Buffers
 {
     public sealed class BasePageFormatter : IPageFormatter
     {

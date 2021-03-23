@@ -1,4 +1,5 @@
-﻿using BB.IO.Primitives;
+﻿using BB.IO.Abstract;
+using BB.IO.Primitives;
 using BB.Memory.Abstract;
 using System;
 using System.Collections.Generic;
@@ -17,8 +18,9 @@ namespace BB.Memory.Base
         private int _modifiedBy = -1;
         private int _logSequenceNumber = -1;
 
-        public Buffer(ILogManager logManager)
+        public Buffer(ILogManager logManager, IFileManager fileManager)
         {
+            _page = new Page(fileManager, fileManager.BlockSize);
             _logManager = logManager;
         }
 

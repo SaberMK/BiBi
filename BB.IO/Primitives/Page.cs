@@ -20,7 +20,16 @@ namespace BB.IO.Primitives
         public int PageSize => _pageSize;
         public Block Block => _block;
 
-        public Page(FileManager fileManager, Block block, int pageSize)
+        public Page(IFileManager fileManager, int pageSize)
+        {
+            _fileManager = fileManager;
+            _position = 0;
+            _block = default;
+            _pageSize = pageSize;
+            _data = new byte[pageSize];
+        }
+
+        public Page(IFileManager fileManager, Block block, int pageSize)
         {
             _fileManager = fileManager;
             _position = 0;
@@ -29,7 +38,7 @@ namespace BB.IO.Primitives
             _data = new byte[pageSize];
         }
 
-        internal Page(FileManager fileManager)
+        internal Page(IFileManager fileManager)
         {
             _fileManager = fileManager;
             _position = 0;
@@ -38,7 +47,7 @@ namespace BB.IO.Primitives
             _data = new byte[_pageSize];
         }
 
-        internal Page(FileManager fileManager, Block block, byte[] data)
+        internal Page(IFileManager fileManager, Block block, byte[] data)
         {
             _fileManager = fileManager;
             _position = 0;
