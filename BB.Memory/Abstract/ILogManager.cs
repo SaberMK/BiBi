@@ -7,7 +7,7 @@ namespace BB.Memory.Abstract
 {
     public interface ILogManager
     {
-        public void Flush(int lsn);
+        void Flush(int lsn);
         bool Append(object[] records, out int lsn);
         IEnumerator<BasicLogRecord> GetEnumerator();
     }

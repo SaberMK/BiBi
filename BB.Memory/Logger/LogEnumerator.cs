@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BB.Memory.Logger
 {
-    public class LogEnumerator : IEnumerator<BasicLogRecord>
+    public sealed class LogEnumerator : IEnumerator<BasicLogRecord>
     {
         private readonly IFileManager _fileManager;
         private readonly Block _logStartBlock;

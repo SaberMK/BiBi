@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BB.Memory.Logger
 {
-    public class LogManager : ILogManager
+    public sealed class LogManager : ILogManager
     {
         private readonly IFileManager _fileManager;
         private readonly string _logFilename;

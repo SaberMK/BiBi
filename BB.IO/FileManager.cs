@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BB.IO
 {
-    public class FileManager : IFileManager
+    public sealed class FileManager : IFileManager
     {
         private readonly DirectoryInfo _dbDirectory;
         private readonly bool _isNew;
