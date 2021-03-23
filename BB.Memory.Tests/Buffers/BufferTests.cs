@@ -6,8 +6,6 @@ using BB.Memory.Base;
 using BB.Memory.Buffers.Formatters;
 using BB.Memory.Logger;
 using NUnit.Framework;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BB.Memory.Tests.Buffers
 {
@@ -51,7 +49,7 @@ namespace BB.Memory.Tests.Buffers
         public void CanUnpinBuffer()
         {
             var buffer = new Buffer(_logManager, _fileManager);
-            
+
             buffer.Pin();
             var isPinned1 = buffer.IsPinned;
 
@@ -405,7 +403,7 @@ namespace BB.Memory.Tests.Buffers
             Assert.IsTrue(canRead);
             Assert.AreEqual(source, value);
         }
-        
+
         [Test]
         public void IsModifiedByCurrentTransaction()
         {

@@ -2,8 +2,6 @@
 using BB.IO.Primitives;
 using BB.Memory.Abstract;
 using BB.Memory.Base;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BB.Memory.Buffers.Strategies
 {
@@ -21,7 +19,7 @@ namespace BB.Memory.Buffers.Strategies
 
             _bufferPool = new Buffer[totalBuffers];
 
-            for(int i =0;i<totalBuffers;++i)
+            for (int i = 0; i < totalBuffers; ++i)
             {
                 _bufferPool[i] = new Buffer(logManager, fileManager);
             }
@@ -95,11 +93,11 @@ namespace BB.Memory.Buffers.Strategies
         }
 
         public int Available => _available;
-        
+
 
         private Buffer FindExistingBuffer(Block block)
         {
-            for(int i = 0; i < _bufferPool.Length; ++i)
+            for (int i = 0; i < _bufferPool.Length; ++i)
             {
                 if (block == _bufferPool[i].Block)
                     return _bufferPool[i];
@@ -110,7 +108,7 @@ namespace BB.Memory.Buffers.Strategies
 
         private Buffer ChooseUnpinnedBuffer()
         {
-            for(int i = 0; i < _bufferPool.Length; ++i)
+            for (int i = 0; i < _bufferPool.Length; ++i)
             {
                 if (!_bufferPool[i].IsPinned)
                     return _bufferPool[i];

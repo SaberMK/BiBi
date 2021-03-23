@@ -4,7 +4,6 @@ using BB.Memory.Abstract;
 using BB.Memory.Base;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace BB.Memory.Logger
 {
@@ -26,7 +25,7 @@ namespace BB.Memory.Logger
 
             var logSize = fileManager.Length(logFilename);
 
-            if(logSize == 0)
+            if (logSize == 0)
             {
                 AppendNewBlock();
             }
@@ -41,7 +40,7 @@ namespace BB.Memory.Logger
 
         public void Flush(int lsn)
         {
-            if(lsn >= _currentBlock.Id)
+            if (lsn >= _currentBlock.Id)
             {
                 Flush();
             }
@@ -52,7 +51,7 @@ namespace BB.Memory.Logger
             lsn = 0;
 
             var totalRecordSize = 0;
-            foreach(var entry in records)
+            foreach (var entry in records)
             {
                 var size = Size(entry);
 
@@ -65,13 +64,13 @@ namespace BB.Memory.Logger
             if (totalRecordSize + sizeof(int) >= _fileManager.BlockSize)
                 return false;
 
-            if(totalRecordSize + _currentPosition + sizeof(int) >= _fileManager.BlockSize)
+            if (totalRecordSize + _currentPosition + sizeof(int) >= _fileManager.BlockSize)
             {
                 Flush();
                 AppendNewBlock();
             }
 
-            foreach(var entry in records)
+            foreach (var entry in records)
             {
                 Append(entry);
             }
@@ -177,7 +176,7 @@ namespace BB.Memory.Logger
 
         private int LastRecordPosition
         {
-            get 
+            get
             {
                 _ = _page.GetInt(LAST_ENTRY_STORAGE_POSITION, out var value);
                 return value;

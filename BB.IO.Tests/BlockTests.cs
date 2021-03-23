@@ -1,8 +1,5 @@
 ﻿using BB.IO.Primitives;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BB.IO.Tests
 {

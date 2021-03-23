@@ -1,7 +1,5 @@
 ﻿using BB.IO.Primitives;
 using BB.Memory.Base;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BB.Memory.Abstract
 {

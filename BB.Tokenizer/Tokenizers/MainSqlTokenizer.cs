@@ -3,7 +3,6 @@ using Superpower;
 using Superpower.Model;
 using Superpower.Parsers;
 using Superpower.Tokenizers;
-using System.Collections.Generic;
 
 namespace BB.Tokenizer.Tokenizers
 {

@@ -1,10 +1,8 @@
 ﻿using BB.IO.Abstract;
 using BB.IO.Primitives;
 using BB.Memory.Base;
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 namespace BB.Memory.Logger
 {

@@ -2,9 +2,6 @@
 using BB.IO.Primitives;
 using BB.Memory.Abstract;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 
 namespace BB.Memory.Base
 {
@@ -37,7 +34,7 @@ namespace BB.Memory.Base
 
         public void Flush()
         {
-            if(_modifiedBy >= 0)
+            if (_modifiedBy >= 0)
             {
                 _logManager.Flush(_logSequenceNumber);
                 _ = _page.Write(_block);
@@ -62,7 +59,7 @@ namespace BB.Memory.Base
         }
 
         public Block Block => _block;
-        
+
         public bool IsModifiedBy(int transactionNumber)
             => _modifiedBy == transactionNumber;
 

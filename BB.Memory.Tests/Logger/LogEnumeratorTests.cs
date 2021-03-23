@@ -7,7 +7,6 @@ using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 namespace BB.Memory.Tests.Logger
 {
@@ -71,8 +70,8 @@ namespace BB.Memory.Tests.Logger
         {
             var filename = RandomFilename;
             _logManager = new LogManager(_fileManager, filename);
-            var canAppend = _logManager.Append(new object[] { 1,2,3,"abc" }, out var lsn);
-            var canAppend2 = _logManager.Append(new object[] { 4,5,6,"def" }, out var lsn2);
+            var canAppend = _logManager.Append(new object[] { 1, 2, 3, "abc" }, out var lsn);
+            var canAppend2 = _logManager.Append(new object[] { 4, 5, 6, "def" }, out var lsn2);
 
             _enumerator = _logManager.GetEnumerator();
             var entry = _enumerator.Current;
@@ -117,7 +116,7 @@ namespace BB.Memory.Tests.Logger
             Assert.AreEqual(3, result2_3);
             Assert.AreEqual("abc", result2_4);
         }
-        
+
         [Test]
         public void CanGetLegacyCSharpEnumerator()
         {
@@ -188,7 +187,7 @@ namespace BB.Memory.Tests.Logger
 
         [Test]
         public void CanStoreLogRecordsOnMultipleMemoryPages()
-        { 
+        {
             var storageString = "London is the capital of GB";
             var filename = RandomFilename;
             _logManager = new LogManager(_fileManager, filename);

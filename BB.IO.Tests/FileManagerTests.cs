@@ -1,9 +1,7 @@
 ﻿using BB.IO.Abstract;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace BB.IO.Tests
 {
@@ -14,7 +12,7 @@ namespace BB.IO.Tests
         [SetUp]
         public void SetUp()
         {
-            if(Directory.Exists("DBs"))
+            if (Directory.Exists("DBs"))
             {
                 Directory.Delete("DBs", true);
             }
@@ -65,7 +63,7 @@ namespace BB.IO.Tests
             Assert.AreEqual(0, block.Id);
             Assert.AreEqual(filename, block.Filename);
 
-            for(int i = 0; i < _fileManager.BlockSize; ++i)
+            for (int i = 0; i < _fileManager.BlockSize; ++i)
             {
                 Assert.AreEqual(readData[i], buffer[i]);
             }
