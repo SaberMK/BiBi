@@ -17,7 +17,6 @@
 
 
 	<ItemGroup>
-	  <Folder Include="Buffer\" />
 	  <Folder Include="Exceptions\" />
 	</ItemGroup>
 </Project>

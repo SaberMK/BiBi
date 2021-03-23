@@ -5,8 +5,6 @@ using BB.Memory.Abstract;
 using BB.Memory.Logger;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BB.Memory.Tests.Logger
 {

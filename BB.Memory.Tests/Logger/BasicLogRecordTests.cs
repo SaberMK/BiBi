@@ -4,8 +4,6 @@ using BB.Memory.Base;
 using Moq;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BB.Memory.Tests.Logger
 {
@@ -37,7 +35,7 @@ namespace BB.Memory.Tests.Logger
         [Test]
         public void CanGetNextInt()
         {
-            var page = _fileManager.ResolvePage(); 
+            var page = _fileManager.ResolvePage();
 
             _logRecord = new BasicLogRecord(page, 0);
 
@@ -195,7 +193,7 @@ namespace BB.Memory.Tests.Logger
             Assert.False(canGetRecord);
             Assert.AreEqual(default(string[]), value);
         }
-        
+
 
         [Test]
         public void CannotGetWrongNextDate()

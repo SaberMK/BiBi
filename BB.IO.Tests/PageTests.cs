@@ -2,9 +2,6 @@
 using BB.IO.Primitives;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace BB.IO.Tests
 {
@@ -229,7 +226,7 @@ namespace BB.IO.Tests
 
                 Assert.False(canSet1);
                 Assert.False(canSet2);
-                Assert.AreEqual(default(string), value1); 
+                Assert.AreEqual(default(string), value1);
                 Assert.AreEqual(default(string), value2);
             });
         }
@@ -385,7 +382,7 @@ namespace BB.IO.Tests
             var canReadPage = _fileManager.Read(block, out var buffer);
 
             Assert.True(canReadPage);
-            for(var i = 0; i < buffer.Length; ++i)
+            for (var i = 0; i < buffer.Length; ++i)
             {
                 Assert.AreEqual(pageBuffer[i], buffer[i]);
             }

@@ -1,14 +1,11 @@
 ﻿using BB.IO.Abstract;
 using BB.IO.Primitives;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace BB.IO
 {
-    public class FileManager : IFileManager
+    public sealed class FileManager : IFileManager
     {
         private readonly DirectoryInfo _dbDirectory;
         private readonly bool _isNew;
@@ -25,7 +22,7 @@ namespace BB.IO
             }
 
             var dbPath = Path.Combine(dbsDirectory, dbName);
-            
+
             _isNew = !Directory.Exists(dbPath);
             if (_isNew)
             {
@@ -100,7 +97,7 @@ namespace BB.IO
 
                 block = new Block(filename, newBlockId);
             }
-            
+
             return true;
         }
 
@@ -134,7 +131,7 @@ namespace BB.IO
         public void Dispose()
         {
             var filesToClose = _openedFiles.Values;
-            foreach(var file in filesToClose)
+            foreach (var file in filesToClose)
             {
                 file.Close();
             }

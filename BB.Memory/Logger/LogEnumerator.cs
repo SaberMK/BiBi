@@ -1,14 +1,12 @@
 ﻿using BB.IO.Abstract;
 using BB.IO.Primitives;
 using BB.Memory.Base;
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 namespace BB.Memory.Logger
 {
-    public class LogEnumerator : IEnumerator<BasicLogRecord>
+    public sealed class LogEnumerator : IEnumerator<BasicLogRecord>
     {
         private readonly IFileManager _fileManager;
         private readonly Block _logStartBlock;

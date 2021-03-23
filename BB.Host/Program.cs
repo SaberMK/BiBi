@@ -20,12 +20,12 @@ namespace BB.Host
             {
                 Console.Write(Prompt);
                 line = Console.ReadLine();
-                if(!string.IsNullOrWhiteSpace(line) && line.Length > 0)
+                if (!string.IsNullOrWhiteSpace(line) && line.Length > 0)
                 {
                     var metaExpressions = new MetaCommandTokenizer().Tokenize(line);
                     var metaCommand = new MetaCommandParser().ParseLine(metaExpressions);
 
-                    if(!(metaCommand is NonMetaExpression))
+                    if (!(metaCommand is NonMetaExpression))
                     {
                         metaCommand.Execute();
                     }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BB.Tokenizer
+﻿namespace BB.Tokenizer
 {
     public class MetaKeywords
     {

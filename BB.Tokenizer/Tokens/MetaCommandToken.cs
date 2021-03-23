@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BB.Tokenizer.Tokens
+﻿namespace BB.Tokenizer.Tokens
 {
     public enum MetaCommandToken
     {
