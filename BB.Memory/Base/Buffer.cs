@@ -31,7 +31,8 @@ namespace BB.Memory.Base
 
         public void Unpin()
         {
-            _pins--;
+            if (_pins > 0)
+                _pins--;
         }
 
         public void Flush()
