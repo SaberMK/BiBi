@@ -37,9 +37,9 @@ namespace BB.Memory.Buffers
 
         public Buffer Pin(Block block)
         {
-            try
-            {
-                long timestamp = DateTime.Now.Ticks;
+            //try
+            //{
+                long timestamp = DateTime.UtcNow.Ticks;
                 Buffer buffer = null;
 
                 lock (_bufferGatheringLock)
@@ -61,18 +61,18 @@ namespace BB.Memory.Buffers
                     throw new BufferBusyException();
 
                 return buffer;
-            }
-            catch(ThreadInterruptedException)
-            {
-                throw new BufferBusyException();
-            }
+            //}
+            //catch(ThreadAbortException)
+            //{
+            //    throw new BufferBusyException();
+            //}
         }
 
         public Buffer PinNew(string filename, IPageFormatter pageFormatter)
         {
-            try
-            {
-                long timestamp = DateTime.Now.Ticks;
+            //try
+            //{
+                long timestamp = DateTime.UtcNow.Ticks;
 
                 Buffer buffer = null;
 
@@ -95,19 +95,22 @@ namespace BB.Memory.Buffers
                     throw new BufferBusyException();
 
                 return buffer;
-            }
-            catch (ThreadInterruptedException)
-            {
-                throw new BufferBusyException();
-            }
+            //}
+            //catch (ThreadAbortException)
+            //{
+            //    throw new BufferBusyException();
+            //}
         }
 
         public void Unpin(Buffer buffer)
         {
             // Maybe Monitor.PulseAll is not a good think, but at lease it would wake up threads.
-            _poolStrategy.Unpin(buffer);
-            if (!buffer.IsPinned)
-                Monitor.PulseAll(_bufferGatheringLock);
+            lock (_bufferGatheringLock)
+            {
+                _poolStrategy.Unpin(buffer);
+                if (!buffer.IsPinned)
+                    Monitor.PulseAll(_bufferGatheringLock);
+            }
         }
 
         public void FlushAll(int transactionNumber)
@@ -119,7 +122,7 @@ namespace BB.Memory.Buffers
 
         private bool WaitingForTooLong(long timestamp)
         {
-            return timestamp + _maxWaitingTime > DateTime.UtcNow.Ticks;
+            return timestamp + _maxWaitingTime < DateTime.UtcNow.Ticks;
         }
     }
 }

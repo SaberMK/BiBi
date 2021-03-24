@@ -9,5 +9,6 @@ namespace BB.Memory.Abstract
         Buffer PinNew(string filename, IPageFormatter pageFormatter);
         void Unpin(Buffer buffer);
         void FlushAll(int transactionNumber);
+        int Available { get; }
     }
 }
