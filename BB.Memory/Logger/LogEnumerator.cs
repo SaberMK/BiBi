@@ -36,14 +36,10 @@ namespace BB.Memory.Logger
 
         object IEnumerator.Current => this;
 
-
         public bool MoveNext()
         {
             if (_currentRecord == 0 && _block.Id == 0)
                 return false;
-
-            if (_currentRecord == 0)
-                MoveToNextBlock();
 
             _ = _page.GetInt(_currentRecord, out _currentRecord);
 

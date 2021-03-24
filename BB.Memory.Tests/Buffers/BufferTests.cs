@@ -6,6 +6,7 @@ using BB.Memory.Base;
 using BB.Memory.Buffers.Formatters;
 using BB.Memory.Logger;
 using NUnit.Framework;
+using System.IO;
 
 namespace BB.Memory.Tests.Buffers
 {
