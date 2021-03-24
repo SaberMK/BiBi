@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace BB.Memory.Logger
 {
-    public sealed class LogEnumerator : IEnumerator<BasicLogRecord>
+    public sealed class LogEnumerator : IEnumerable<BasicLogRecord>, IEnumerator<BasicLogRecord>
     {
         private readonly IFileManager _fileManager;
         private readonly Block _logStartBlock;
@@ -35,7 +35,6 @@ namespace BB.Memory.Logger
         }
 
         object IEnumerator.Current => this;
-
 
         public bool MoveNext()
         {
@@ -74,6 +73,16 @@ namespace BB.Memory.Logger
             _block = new Block(_block.Filename, _block.Id - 1);
             _page.Read(_block);
             _ = _page.GetInt(LogManager.LAST_ENTRY_STORAGE_POSITION, out _currentRecord);
+        }
+
+        public IEnumerator<BasicLogRecord> GetEnumerator()
+        {
+            return this;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this;
         }
     }
 }
