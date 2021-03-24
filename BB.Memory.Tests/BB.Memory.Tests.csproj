@@ -17,8 +17,4 @@
     <ProjectReference Include="..\BB.Memory\BB.Memory.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Buffers\Strategies\" />
-  </ItemGroup>
-
 </Project>
