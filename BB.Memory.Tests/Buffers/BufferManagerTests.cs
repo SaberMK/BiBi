@@ -41,7 +41,7 @@ namespace BB.Memory.Tests.Buffers
         {
             Assert.DoesNotThrow(() =>
             {
-                _poolStrategy = new NaiveBufferPoolStrategy(_logManager, _fileManager, 3);
+                _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3);
                 _bufferManager = new BufferManager(_fileManager,_logManager, _poolStrategy, null, null);
             });
         }
@@ -49,7 +49,7 @@ namespace BB.Memory.Tests.Buffers
         [Test]
         public void CanPinBuffer()
         {
-            _poolStrategy = new NaiveBufferPoolStrategy(_logManager, _fileManager, 3);
+            _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3);
             _bufferManager = new BufferManager(_fileManager, _logManager, _poolStrategy, null, null);
 
             var filename = RandomFilename;
@@ -66,7 +66,7 @@ namespace BB.Memory.Tests.Buffers
         [Test]
         public void CanPinSameBufferMultipleTimes()
         {
-            _poolStrategy = new NaiveBufferPoolStrategy(_logManager, _fileManager, 3);
+            _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3);
             _bufferManager = new BufferManager(_fileManager, _logManager, _poolStrategy, null, null);
 
             var filename = RandomFilename;
@@ -87,7 +87,7 @@ namespace BB.Memory.Tests.Buffers
         [Test]
         public void CanPinAllBuffers()
         {
-            _poolStrategy = new NaiveBufferPoolStrategy(_logManager, _fileManager, 3);
+            _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3);
             _bufferManager = new BufferManager(_fileManager, _logManager, _poolStrategy, null, null);
 
             var filename = RandomFilename;
@@ -114,7 +114,7 @@ namespace BB.Memory.Tests.Buffers
         [Test]
         public void CannotPinMoreBuffersThatIsOnPool()
         {
-            _poolStrategy = new NaiveBufferPoolStrategy(_logManager, _fileManager, 3);
+            _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3);
             _bufferManager = new BufferManager(_fileManager, _logManager, _poolStrategy, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(100));
 
             var filename = RandomFilename;
@@ -148,7 +148,7 @@ namespace BB.Memory.Tests.Buffers
         [Test]
         public void CanPinNewBuffer()
         {
-            _poolStrategy = new NaiveBufferPoolStrategy(_logManager, _fileManager, 3);
+            _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3);
             _bufferManager = new BufferManager(_fileManager, _logManager, _poolStrategy, null, null);
 
             var filename = RandomFilename;
@@ -168,7 +168,7 @@ namespace BB.Memory.Tests.Buffers
         [Test]
         public void CannotPinMoreNewBlocksThatPoolHave()
         {
-            _poolStrategy = new NaiveBufferPoolStrategy(_logManager, _fileManager, 3); 
+            _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3); 
             _bufferManager = new BufferManager(_fileManager, _logManager, _poolStrategy, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(100));
 
             var filename = RandomFilename;
@@ -198,7 +198,7 @@ namespace BB.Memory.Tests.Buffers
         [Test]
         public void CanUnpinBuffer()
         {
-            _poolStrategy = new NaiveBufferPoolStrategy(_logManager, _fileManager, 3);
+            _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3);
             _bufferManager = new BufferManager(_fileManager, _logManager, _poolStrategy, null, null);
 
             var filename = RandomFilename;
@@ -226,7 +226,7 @@ namespace BB.Memory.Tests.Buffers
         [Test]
         public void CanPinBufferMultipleTimesAndUnpinMultipleTimes()
         {
-            _poolStrategy = new NaiveBufferPoolStrategy(_logManager, _fileManager, 3);
+            _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3);
             _bufferManager = new BufferManager(_fileManager, _logManager, _poolStrategy, null, null);
 
             var filename = RandomFilename;
@@ -256,7 +256,7 @@ namespace BB.Memory.Tests.Buffers
         [Test]
         public void CanPinBufferWriteAndFlush()
         {
-            _poolStrategy = new NaiveBufferPoolStrategy(_logManager, _fileManager, 3);
+            _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3);
             _bufferManager = new BufferManager(_fileManager, _logManager, _poolStrategy, null, null);
 
             var filename = RandomFilename;
@@ -265,8 +265,8 @@ namespace BB.Memory.Tests.Buffers
             var buffer1 = _bufferManager.PinNew(filename, pageFormatter);
 
             buffer1.SetInt(0, 123, 1, 1);
-            _bufferManager.Unpin(buffer1);
             _bufferManager.FlushAll(1);
+            _bufferManager.Unpin(buffer1);
 
             var page = _fileManager.ResolvePage();
             var canRead = page.Read(new Block(filename, 0));

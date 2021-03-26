@@ -94,7 +94,6 @@ namespace BB.Memory.Buffers.Strategies
 
         public int Available => _available;
 
-
         private Buffer FindExistingBuffer(Block block)
         {
             for (int i = 0; i < _bufferPool.Length; ++i)
@@ -111,7 +110,10 @@ namespace BB.Memory.Buffers.Strategies
             for (int i = 0; i < _bufferPool.Length; ++i)
             {
                 if (!_bufferPool[i].IsPinned)
+                {
+                    _bufferPool[i].Flush();
                     return _bufferPool[i];
+                }
             }
 
             return null;

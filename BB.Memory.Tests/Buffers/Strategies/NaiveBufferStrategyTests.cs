@@ -6,7 +6,6 @@ using BB.Memory.Buffers.Formatters;
 using BB.Memory.Buffers.Strategies;
 using BB.Memory.Logger;
 using NUnit.Framework;
-using System.IO;
 using Guid = System.Guid;
 
 namespace BB.Memory.Tests.Buffers.Strategies
