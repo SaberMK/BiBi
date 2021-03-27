@@ -13,10 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Records\Sets\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\BB.Memory\BB.Memory.csproj" />
     <ProjectReference Include="..\BB.Transactions\BB.Transactions.csproj" />
   </ItemGroup>

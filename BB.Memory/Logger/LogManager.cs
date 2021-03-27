@@ -20,6 +20,7 @@ namespace BB.Memory.Logger
         private int _currentPosition;
 
         private int _lsn;
+        private int _lastSavedLsn;
 
         public LogManager(IFileManager fileManager, string logFilename)
         {
@@ -27,6 +28,7 @@ namespace BB.Memory.Logger
             _logFilename = logFilename;
             _page = _fileManager.ResolvePage();
             _lsn = -1;
+            _lastSavedLsn = -1;
 
             var logSize = fileManager.Length(logFilename);
 
@@ -45,9 +47,10 @@ namespace BB.Memory.Logger
 
         public void Flush(int lsn)
         {
-            if (lsn >= _currentBlock.Id)
+            if (lsn >= _lastSavedLsn)
             {
                 Flush();
+                _lastSavedLsn = lsn;
             }
         }
 

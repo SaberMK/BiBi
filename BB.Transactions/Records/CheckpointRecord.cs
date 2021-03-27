@@ -57,7 +57,7 @@ namespace BB.Transactions.Records
         }
 
         public override string ToString()
-            => $"<CHECKPOINT [{string.Concat(_transactionNumbers)}]>";
+            => $"<CHECKPOINT [{string.Join(", ", _transactionNumbers)}]>";
 
         public int[] Transactions => _transactionNumbers;
     }
