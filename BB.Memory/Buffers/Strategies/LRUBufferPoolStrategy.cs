@@ -2,8 +2,8 @@
 using BB.IO.Primitives;
 using BB.Memory.Abstract;
 using BB.Memory.Base;
-using DateTime = System.DateTime;
 using System.Collections.Generic;
+using DateTime = System.DateTime;
 
 namespace BB.Memory.Buffers.Strategies
 {

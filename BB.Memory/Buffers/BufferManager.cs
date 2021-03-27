@@ -2,10 +2,10 @@
 using BB.IO.Primitives;
 using BB.Memory.Abstract;
 using BB.Memory.Base;
-using TimeSpan = System.TimeSpan;
-using DateTime = System.DateTime;
-using System.Threading;
 using BB.Memory.Exceptions;
+using System.Threading;
+using DateTime = System.DateTime;
+using TimeSpan = System.TimeSpan;
 
 namespace BB.Memory.Buffers
 {
@@ -39,28 +39,28 @@ namespace BB.Memory.Buffers
         {
             //try
             //{
-                long timestamp = DateTime.UtcNow.Ticks;
-                Buffer buffer = null;
+            long timestamp = DateTime.UtcNow.Ticks;
+            Buffer buffer = null;
+
+            lock (_bufferGatheringLock)
+            {
+                buffer = _poolStrategy.Pin(block);
+            }
+
+            while (buffer == null && !WaitingForTooLong(timestamp))
+            {
+                Thread.Sleep(_tickWaitingTime);
 
                 lock (_bufferGatheringLock)
                 {
                     buffer = _poolStrategy.Pin(block);
                 }
+            }
 
-                while(buffer == null && !WaitingForTooLong(timestamp))
-                {
-                    Thread.Sleep(_tickWaitingTime);
+            if (buffer == null)
+                throw new BufferBusyException();
 
-                    lock (_bufferGatheringLock)
-                    {
-                        buffer = _poolStrategy.Pin(block);
-                    }
-                }
-
-                if (buffer == null)
-                    throw new BufferBusyException();
-
-                return buffer;
+            return buffer;
             //}
             //catch(ThreadAbortException)
             //{
@@ -72,29 +72,29 @@ namespace BB.Memory.Buffers
         {
             //try
             //{
-                long timestamp = DateTime.UtcNow.Ticks;
+            long timestamp = DateTime.UtcNow.Ticks;
 
-                Buffer buffer = null;
+            Buffer buffer = null;
+
+            lock (_bufferGatheringLock)
+            {
+                buffer = _poolStrategy.PinNew(filename, pageFormatter);
+            }
+
+            while (buffer == null && !WaitingForTooLong(timestamp))
+            {
+                Thread.Sleep(_tickWaitingTime);
 
                 lock (_bufferGatheringLock)
                 {
                     buffer = _poolStrategy.PinNew(filename, pageFormatter);
                 }
+            }
 
-                while (buffer == null && !WaitingForTooLong(timestamp))
-                {
-                    Thread.Sleep(_tickWaitingTime);
+            if (buffer == null)
+                throw new BufferBusyException();
 
-                    lock (_bufferGatheringLock)
-                    {
-                        buffer = _poolStrategy.PinNew(filename, pageFormatter);
-                    }
-                }
-
-                if (buffer == null)
-                    throw new BufferBusyException();
-
-                return buffer;
+            return buffer;
             //}
             //catch (ThreadAbortException)
             //{
