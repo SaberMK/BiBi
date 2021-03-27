@@ -12,16 +12,21 @@ namespace BB.Memory.Logger
         private readonly IFileManager _fileManager;
         private readonly string _logFilename;
         private readonly Page _page;
+        private readonly object _bufferLock = new object();
+
         public static readonly int LAST_ENTRY_STORAGE_POSITION = 0;
 
         private Block _currentBlock;
         private int _currentPosition;
+
+        private int _lsn;
 
         public LogManager(IFileManager fileManager, string logFilename)
         {
             _fileManager = fileManager;
             _logFilename = logFilename;
             _page = _fileManager.ResolvePage();
+            _lsn = -1;
 
             var logSize = fileManager.Length(logFilename);
 
@@ -64,19 +69,25 @@ namespace BB.Memory.Logger
             if (totalRecordSize + sizeof(int) >= _fileManager.BlockSize)
                 return false;
 
-            if (totalRecordSize + _currentPosition + sizeof(int) >= _fileManager.BlockSize)
+            lock (_bufferLock)
             {
-                Flush();
-                AppendNewBlock();
+                if (totalRecordSize + _currentPosition + sizeof(int) >= _fileManager.BlockSize)
+                {
+                    Flush();
+                    AppendNewBlock();
+                }
+
+                foreach (var entry in records)
+                {
+                    Append(entry);
+                }
+
+                FinalizeRecord();
+
+                _lsn++; 
+                lsn = _lsn;
             }
 
-            foreach (var entry in records)
-            {
-                Append(entry);
-            }
-
-            FinalizeRecord();
-            lsn = _currentBlock.Id;
             return true;
         }
 

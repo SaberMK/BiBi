@@ -56,7 +56,7 @@ namespace BB.Memory.Tests.Logger
             Assert.IsTrue(canReadLogEntry);
             Assert.IsTrue(canReadLogEntry2);
             Assert.AreEqual(0, lsn);
-            Assert.AreEqual(0, lsn2);
+            Assert.AreEqual(1, lsn2);
 
             Assert.IsTrue(canMove1);
             Assert.IsFalse(canMove2);
@@ -101,7 +101,7 @@ namespace BB.Memory.Tests.Logger
             Assert.IsTrue(canReadLogEntry2_3);
             Assert.IsTrue(canReadLogEntry2_4);
             Assert.AreEqual(0, lsn);
-            Assert.AreEqual(0, lsn2);
+            Assert.AreEqual(1, lsn2);
 
             Assert.IsTrue(canMove1);
             Assert.IsFalse(canMove2);
@@ -229,8 +229,8 @@ namespace BB.Memory.Tests.Logger
             Assert.IsTrue(canReadLogEntry3_2);
             Assert.IsTrue(canReadLogEntry3_3);
             Assert.AreEqual(0, lsn);
-            Assert.AreEqual(0, lsn2);
-            Assert.AreEqual(1, lsn3);
+            Assert.AreEqual(1, lsn2);
+            Assert.AreEqual(2, lsn3);
 
             Assert.IsTrue(canMove1);
             Assert.IsTrue(canMove2);
