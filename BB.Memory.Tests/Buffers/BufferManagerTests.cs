@@ -9,10 +9,6 @@ using BB.Memory.Exceptions;
 using BB.Memory.Logger;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace BB.Memory.Tests.Buffers
 {
@@ -30,7 +26,7 @@ namespace BB.Memory.Tests.Buffers
             _fileManager = new FileManager("temp", "DBs", 100);
             _logManager = new LogManager(_fileManager, RandomFilename);
             _pageFormatter = new BasePageFormatter();
-            
+
             // TODO MOCK POOL STRATEGY!!!
             // Or not? It seems default, mock would be like native...
             // Anyway, think about it a bit
@@ -42,7 +38,7 @@ namespace BB.Memory.Tests.Buffers
             Assert.DoesNotThrow(() =>
             {
                 _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3);
-                _bufferManager = new BufferManager(_fileManager,_logManager, _poolStrategy, null, null);
+                _bufferManager = new BufferManager(_fileManager, _logManager, _poolStrategy, null, null);
             });
         }
 
@@ -141,7 +137,7 @@ namespace BB.Memory.Tests.Buffers
             {
                 var buffer4 = _bufferManager.Pin(block4);
             });
-            
+
             Assert.AreEqual(0, _bufferManager.Available);
         }
 
@@ -168,7 +164,7 @@ namespace BB.Memory.Tests.Buffers
         [Test]
         public void CannotPinMoreNewBlocksThatPoolHave()
         {
-            _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3); 
+            _poolStrategy = new LRUBufferPoolStrategy(_logManager, _fileManager, 3);
             _bufferManager = new BufferManager(_fileManager, _logManager, _poolStrategy, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(100));
 
             var filename = RandomFilename;

@@ -4,7 +4,6 @@ using BB.Memory.Base;
 using Moq;
 using NUnit.Framework;
 using System;
-using System.IO;
 
 namespace BB.Memory.Tests.Logger
 {
