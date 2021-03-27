@@ -2,7 +2,7 @@
 
 namespace BB.Transactions.Recovery
 {
-    public class RecoveryManager : IRecoveryManager
+    public class RecoveryManager// : IRecoveryManager
     {
 
     }
