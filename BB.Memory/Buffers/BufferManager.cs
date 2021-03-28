@@ -23,8 +23,8 @@ namespace BB.Memory.Buffers
             IFileManager fileManager,
             ILogManager logManager,
             IBufferPoolStrategy poolStrategy,
-            TimeSpan? maxWaitingTime,
-            TimeSpan? tickWaitingTime)
+            TimeSpan? maxWaitingTime = null,
+            TimeSpan? tickWaitingTime = null)
         {
             _fileManager = fileManager;
             _logManager = logManager;
