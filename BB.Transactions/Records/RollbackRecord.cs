@@ -21,6 +21,7 @@ namespace BB.Transactions.Records
             BasicLogRecord record)
             : base(logManager, bufferManager, LogRecordType.Rollback)
         {
+            _ = record.NextInt(out var _);
             _ = record.NextInt(out _transactionNumber);
         }
 
@@ -28,7 +29,7 @@ namespace BB.Transactions.Records
         {
             var record = new object[]
             {
-                LogRecordType.Rollback,
+                (int)LogRecordType.Rollback,
                 _transactionNumber
             };
 

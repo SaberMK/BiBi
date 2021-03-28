@@ -6,7 +6,7 @@ using BB.Transactions.Abstract;
 namespace BB.Transactions.Records
 {
     // ref struct?
-    public class SetIntRecord : LogRecord
+    public class SetIntRecord : LogRecord, IDataLogRecord<int>
     {
         private readonly int _offset;
         private int _value;
@@ -68,5 +68,9 @@ namespace BB.Transactions.Records
 
         public override string ToString()
             => $"<SETINT {_transactionNumber} {_block.Filename} {_block.Id} {_offset} {_value}>";
+
+        public int Offset => _offset;
+        public int Value => _value;
+        public Block Block => _block;
     }
 }

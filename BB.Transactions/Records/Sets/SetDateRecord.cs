@@ -7,12 +7,11 @@ using System;
 namespace BB.Transactions.Records
 {
     // ref struct?
-    public class SetDateRecord : LogRecord
+    public class SetDateRecord : LogRecord, IDataLogRecord<DateTime>
     {
         private readonly int _offset;
         private DateTime _value;
         private Block _block;
-        protected int _transactionNumber;
 
         public SetDateRecord(
             ILogManager logManager,
@@ -73,5 +72,9 @@ namespace BB.Transactions.Records
 
         public override string ToString()
             => $"<SETDATE {_transactionNumber} {_block.Filename} {_block.Id} {_offset} {_value.ToShortDateString()}>";
+
+        public int Offset => _offset;
+        public DateTime Value => _value;
+        public Block Block => _block;
     }
 }

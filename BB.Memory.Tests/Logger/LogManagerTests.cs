@@ -226,7 +226,7 @@ namespace BB.Memory.Tests.Logger
             Assert.IsTrue(canAppend1);
             Assert.AreEqual(0, lsn1);
             Assert.IsTrue(canAppend2);
-            Assert.AreEqual(0, lsn2);
+            Assert.AreEqual(1, lsn2);
         }
 
         [Test]
@@ -252,9 +252,9 @@ namespace BB.Memory.Tests.Logger
             Assert.IsTrue(canAppend1);
             Assert.AreEqual(0, lsn1);
             Assert.IsTrue(canAppend2);
-            Assert.AreEqual(0, lsn2);
+            Assert.AreEqual(1, lsn2);
             Assert.IsTrue(canAppend3);
-            Assert.AreEqual(1, lsn3);
+            Assert.AreEqual(2, lsn3);
         }
 
         private string RandomFilename => $"{Guid.NewGuid()}.bin";

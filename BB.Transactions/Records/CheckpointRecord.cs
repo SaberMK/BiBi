@@ -23,6 +23,7 @@ namespace BB.Transactions.Records
             BasicLogRecord record)
             : base(logManager, bufferManager, LogRecordType.Checkpoint)
         {
+            _ = record.NextInt(out var _);
             _ = record.NextInt(out var length);
 
             _transactionNumbers = new int[length];
@@ -35,12 +36,14 @@ namespace BB.Transactions.Records
 
         public override int WriteToLog()
         {
-            var record = new object[1 + _transactionNumbers.Length];
-            record[0] = LogRecordType.Checkpoint;
+            var record = new object[2 + _transactionNumbers.Length];
+
+            record[0] = (int)LogRecordType.Checkpoint;
+            record[1] = _transactionNumbers.Length;
 
             for (int i = 0; i < _transactionNumbers.Length; ++i)
             {
-                record[1 + i] = _transactionNumbers[i];
+                record[2 + i] = _transactionNumbers[i];
             }
 
             _ = _logManager.Append(record, out var lsn);
@@ -54,6 +57,8 @@ namespace BB.Transactions.Records
         }
 
         public override string ToString()
-            => $"<CHECKPOINT [{string.Concat(_transactionNumbers)}]>";
+            => $"<CHECKPOINT [{string.Join(", ", _transactionNumbers)}]>";
+
+        public int[] Transactions => _transactionNumbers;
     }
 }

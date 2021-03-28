@@ -47,7 +47,7 @@ namespace BB.Memory.Base
             if (!_page.GetBlob(_position, out value))
                 return false;
 
-            _position += value.Length;
+            _position += value.Length + sizeof(int);
             return true;
         }
 
@@ -57,7 +57,7 @@ namespace BB.Memory.Base
                 return false;
 
             // Maybe it would cause troubles with different encodings
-            _position += value.Length;
+            _position += value.Length + sizeof(int);
             return true;
         }
 
