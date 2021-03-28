@@ -64,12 +64,6 @@ namespace BB.Transactions.Recovery
         {
             _ = buffer.GetInt(offset, out var oldValue);
 
-
-            // Check out, should we update it?
-            // Also check out, should we put -1 here?
-            // More questions than answers...
-            _ = buffer.SetInt(offset, newValue, _transactionNumber, -1);
-
             var block = buffer.Block;
 
             if (IsTemporaryBlock(block))
@@ -82,12 +76,6 @@ namespace BB.Transactions.Recovery
         public int SetString(Buffer buffer, int offset, string newValue)
         {
             _ = buffer.GetString(offset, out var oldValue);
-
-
-            // Check out, should we update it?
-            // Also check out, should we put -1 here?
-            // More questions than answers...
-            _ = buffer.SetString(offset, newValue, _transactionNumber, -1);
 
             var block = buffer.Block;
 
@@ -102,12 +90,6 @@ namespace BB.Transactions.Recovery
         {
             _ = buffer.GetDate(offset, out var oldValue);
 
-
-            // Check out, should we update it?
-            // Also check out, should we put -1 here?
-            // More questions than answers...
-            _ = buffer.SetDate(offset, newValue, _transactionNumber, -1);
-
             var block = buffer.Block;
 
             if (IsTemporaryBlock(block))
@@ -120,12 +102,6 @@ namespace BB.Transactions.Recovery
         public int SetByte(Buffer buffer, int offset, byte newValue)
         {
             _ = buffer.GetByte(offset, out var oldValue);
-
-
-            // Check out, should we update it?
-            // Also check out, should we put -1 here?
-            // More questions than answers...
-            _ = buffer.SetByte(offset, newValue, _transactionNumber, -1);
 
             var block = buffer.Block;
 
@@ -140,12 +116,6 @@ namespace BB.Transactions.Recovery
         {
             _ = buffer.GetBool(offset, out var oldValue);
 
-
-            // Check out, should we update it?
-            // Also check out, should we put -1 here?
-            // More questions than answers...
-            _ = buffer.SetBool(offset, newValue, _transactionNumber, -1);
-
             var block = buffer.Block;
 
             if (IsTemporaryBlock(block))
@@ -158,12 +128,6 @@ namespace BB.Transactions.Recovery
         public int SetBlob(Buffer buffer, int offset, byte[] newValue)
         {
             _ = buffer.GetBlob(offset, out var oldValue);
-
-
-            // Check out, should we update it?
-            // Also check out, should we put -1 here?
-            // More questions than answers...
-            _ = buffer.SetBlob(offset, newValue, _transactionNumber, -1);
 
             var block = buffer.Block;
 
