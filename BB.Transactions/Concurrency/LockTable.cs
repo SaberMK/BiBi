@@ -42,7 +42,7 @@ namespace BB.Transactions.Concurrency
                 throw new LockAbortException();
 
             var value = GetLockValue(block) + 1;
-            _locks.AddOrUpdate(block, value, (block, value) => value);
+            _locks.AddOrUpdate(block, value, (block, val) => value);
         }
 
         public void ExclusiveLock(Block block)
@@ -69,15 +69,11 @@ namespace BB.Transactions.Concurrency
                 var value = GetLockValue(block);
                 if (value > 1)
                 {
-                    _locks.AddOrUpdate(block, value - 1, (_, value) => value - 1);
+                    _locks.AddOrUpdate(block, value - 1, (_, val) => value - 1);
                 }
                 else
                 {
                     _locks.Remove(block, out var _);
-
-                    // TODO maybe move it downwards? Or upwards?
-                    // Do not completely sure how pulse all works in monitors and locks
-                    Monitor.PulseAll(_releaseLock);
                 }
             }
             finally
