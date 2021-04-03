@@ -28,7 +28,7 @@ namespace BB.Transactions.Helpers
         {
             var buffer = _bufferManager.Pin(block);
 
-            _buffers.Add(block, buffer);
+            _buffers.TryAdd(block, buffer);
             _pins.Add(block);
         }
 
@@ -37,7 +37,7 @@ namespace BB.Transactions.Helpers
             var buffer = _bufferManager.PinNew(filename, pageFormatter);
             var block = buffer.Block;
 
-            _buffers.Add(block, buffer);
+            _buffers.TryAdd(block, buffer);
             _pins.Add(block);
 
             return block;
