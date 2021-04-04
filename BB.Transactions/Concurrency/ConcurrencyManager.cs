@@ -10,21 +10,32 @@ namespace BB.Transactions.Concurrency
     public class ConcurrencyManager : IConcurrencyManager
     {
         private readonly LockTable _lockTable;
-        private Dictionary<Block, ConcurrencyLockType> _locks;
+        private readonly Dictionary<Block, ConcurrencyLockType> _locks;
+        private readonly object _lock = new object();
 
         public ConcurrencyManager(LockTable lockTable)
         {
             _lockTable = lockTable;
+            _locks = new Dictionary<Block, ConcurrencyLockType>();
+        }
+
+        public ConcurrencyManager()
+        {
+            _lockTable = new LockTable(null, null);
+            _locks = new Dictionary<Block, ConcurrencyLockType>();
         }
 
         // TODO it should not cause concurrency issues,
         // but still need to check out
         public void SharedLock(Block block)
         {
-            if(!_locks.TryGetValue(block, out var value))
+            lock (_lock)
             {
-                _lockTable.SharedLock(block);
-                _locks.Add(block, ConcurrencyLockType.Shared);
+                if (!_locks.TryGetValue(block, out var value))
+                {
+                    _lockTable.SharedLock(block);
+                    _locks.Add(block, ConcurrencyLockType.Shared);
+                }
             }
         }
 
@@ -32,11 +43,13 @@ namespace BB.Transactions.Concurrency
         // but still need to check out
         public void ExclusiveLock(Block block)
         {
-            if (!HasExclusiveLock(block))
+            lock (_lock)
             {
-                SharedLock(block);
-                _lockTable.ExclusiveLock(block);
-                _locks[block] = ConcurrencyLockType.Exclusive;
+                if (!HasExclusiveLock(block))
+                {
+                    _lockTable.ExclusiveLock(block);
+                    _locks[block] = ConcurrencyLockType.Exclusive;
+                }
             }
         }
 
@@ -44,12 +57,15 @@ namespace BB.Transactions.Concurrency
         // but still need to check out
         public void Release()
         {
-            foreach(var block in _locks.Keys)
+            lock (_lock)
             {
-                _lockTable.Unlock(block);
-            }
+                foreach (var block in _locks.Keys)
+                {
+                    _lockTable.Unlock(block);
+                }
 
-            _locks.Clear();
+                _locks.Clear();
+            }
         }
 
         private bool HasExclusiveLock(Block block)
