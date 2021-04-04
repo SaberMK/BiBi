@@ -10,7 +10,7 @@ using BB.Transactions.Records;
 using BB.Transactions.Recovery;
 using NUnit.Framework;
 using System;
-
+using System.IO;
 
 namespace BB.Transactions.Tests.Records.Sets
 {
@@ -170,6 +170,11 @@ namespace BB.Transactions.Tests.Records.Sets
             Assert.IsTrue(result.Contains(_putToBlock.Filename.ToString().ToUpper()));
         }
 
+        [OneTimeTearDown]
+        public void ClearDirectory()
+        {
+            Directory.Delete("DBs", true);
+        }
         private string RandomFilename => $"{Guid.NewGuid()}.bin";
     }
 }

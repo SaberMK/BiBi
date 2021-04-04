@@ -9,6 +9,7 @@ using BB.Transactions.Abstract;
 using BB.Transactions.Records;
 using NUnit.Framework;
 using System;
+using System.IO;
 
 namespace BB.Transactions.Tests.Records
 {
@@ -129,6 +130,12 @@ namespace BB.Transactions.Tests.Records
 
             Assert.IsTrue(result.Contains("ROLLBACK"));
             Assert.IsTrue(result.Contains("5"));
+        }
+
+        [OneTimeTearDown]
+        public void ClearDirectory()
+        {
+            Directory.Delete("DBs", true);
         }
 
         private string RandomFilename => $"{Guid.NewGuid()}.bin";

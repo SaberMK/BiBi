@@ -11,6 +11,7 @@ using BB.Transactions.Helpers;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace BB.Transactions.Tests.Helpers
@@ -138,6 +139,12 @@ namespace BB.Transactions.Tests.Helpers
                 _buffersList.Pin(block);
                 _buffersList.UnpinAll();
             });
+        }
+
+        [OneTimeTearDown]
+        public void ClearDirectory()
+        {
+            Directory.Delete("DBs", true);
         }
 
         private string RandomFilename => $"{Guid.NewGuid()}.bin";
