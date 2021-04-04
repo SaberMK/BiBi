@@ -63,8 +63,9 @@ namespace BB.Transactions.Tests.Records.Sets
 
             _logManager.Flush(lsn);
 
-            var logRecord = new LogRecordEnumerator(_logManager, _bufferManager);
-            var currentRecord = logRecord.Current as SetDateRecord;
+            var enumerator = _logManager.GetEnumerator();
+            var record = enumerator.Current;
+            var currentRecord = new SetDateRecord(_logManager, _bufferManager, record);
 
             Assert.IsNotNull(currentRecord);
             Assert.AreEqual(LogRecordType.SetDate, currentRecord.Type);
@@ -97,10 +98,12 @@ namespace BB.Transactions.Tests.Records.Sets
 
             _logManager.Flush(lsn2);
 
-            var logRecord = new LogRecordEnumerator(_logManager, _bufferManager);
-            var currentRecord2 = logRecord.Current as SetDateRecord;
-            logRecord.MoveNext();
-            var currentRecord1 = logRecord.Current as SetDateRecord;
+            var enumerator = _logManager.GetEnumerator();
+            var record = enumerator.Current;
+            var currentRecord2 = new SetDateRecord(_logManager, _bufferManager, record);
+            enumerator.MoveNext();
+            record = enumerator.Current;
+            var currentRecord1 = new SetDateRecord(_logManager, _bufferManager, record);
 
             Assert.IsNotNull(currentRecord2);
             Assert.AreEqual(LogRecordType.SetDate, currentRecord2.Type);

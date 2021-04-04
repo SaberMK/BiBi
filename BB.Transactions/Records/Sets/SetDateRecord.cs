@@ -31,9 +31,15 @@ namespace BB.Transactions.Records
         public SetDateRecord(
             ILogManager logManager,
             IBufferManager bufferManager,
-            BasicLogRecord record)
+            BasicLogRecord record,
+            bool needOffset = true)
             : base(logManager, bufferManager, LogRecordType.SetDate)
         {
+            if (needOffset)
+            {
+                _ = record.NextInt(out var _);
+            }
+
             _ = record.NextInt(out _transactionNumber);
             _ = record.NextString(out var filename);
             _ = record.NextInt(out var blockNumber);

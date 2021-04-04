@@ -31,34 +31,34 @@ namespace BB.Transactions.Recovery
                 switch (type)
                 {
                     case LogRecordType.Checkpoint:
-                        return new CheckpointRecord(_logManager, _bufferManager, record);
+                        return new CheckpointRecord(_logManager, _bufferManager, record, false);
 
                     case LogRecordType.Start:
-                        return new StartRecord(_logManager, _bufferManager, record);
+                        return new StartRecord(_logManager, _bufferManager, record, false);
 
                     case LogRecordType.Commit:
-                        return new CommitRecord(_logManager, _bufferManager, record);
+                        return new CommitRecord(_logManager, _bufferManager, record, false);
 
                     case LogRecordType.Rollback:
-                        return new RollbackRecord(_logManager, _bufferManager, record);
+                        return new RollbackRecord(_logManager, _bufferManager, record, false);
 
                     case LogRecordType.SetInt:
-                        return new SetIntRecord(_logManager, _bufferManager, record);
+                        return new SetIntRecord(_logManager, _bufferManager, record, false);
 
                     case LogRecordType.SetByte:
-                        return new SetByteRecord(_logManager, _bufferManager, record);
+                        return new SetByteRecord(_logManager, _bufferManager, record, false);
 
                     case LogRecordType.SetBool:
-                        return new SetBoolRecord(_logManager, _bufferManager, record);
+                        return new SetBoolRecord(_logManager, _bufferManager, record, false);
 
                     case LogRecordType.SetBlob:
-                        return new SetBlobRecord(_logManager, _bufferManager, record);
+                        return new SetBlobRecord(_logManager, _bufferManager, record, false);
 
                     case LogRecordType.SetString:
-                        return new SetStringRecord(_logManager, _bufferManager, record);
+                        return new SetStringRecord(_logManager, _bufferManager, record, false);
 
                     case LogRecordType.SetDate:
-                        return new SetDateRecord(_logManager, _bufferManager, record);
+                        return new SetDateRecord(_logManager, _bufferManager, record, false);
 
                     default:
                         return null;

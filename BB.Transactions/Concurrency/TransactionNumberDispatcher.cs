@@ -12,7 +12,7 @@ namespace BB.Transactions.Concurrency
 
         public TransactionNumberDispatcher(int nextTransactionNumber = 0)
         {
-            _nextTransactionNumber = 0;
+            _nextTransactionNumber = nextTransactionNumber;
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

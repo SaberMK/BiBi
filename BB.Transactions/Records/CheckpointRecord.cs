@@ -20,10 +20,15 @@ namespace BB.Transactions.Records
         public CheckpointRecord(
             ILogManager logManager,
             IBufferManager bufferManager,
-            BasicLogRecord record)
+            BasicLogRecord record,
+            bool needOffset = true)
             : base(logManager, bufferManager, LogRecordType.Checkpoint)
         {
-            _ = record.NextInt(out var _);
+            if (needOffset) 
+            { 
+                _ = record.NextInt(out var _);
+            }
+
             _ = record.NextInt(out var length);
 
             _transactionNumbers = new int[length];

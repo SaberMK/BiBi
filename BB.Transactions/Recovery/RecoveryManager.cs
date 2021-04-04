@@ -57,7 +57,7 @@ namespace BB.Transactions.Recovery
                 .WriteToLog();
 
             _logManager.Flush(lsn);
-        }
+        } 
 
 
         public int SetInt(Buffer buffer, int offset, int newValue)
