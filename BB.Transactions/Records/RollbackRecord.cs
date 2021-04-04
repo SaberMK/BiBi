@@ -18,10 +18,15 @@ namespace BB.Transactions.Records
         public RollbackRecord(
             ILogManager logManager,
             IBufferManager bufferManager,
-            BasicLogRecord record)
+            BasicLogRecord record,
+            bool needOffset = true)
             : base(logManager, bufferManager, LogRecordType.Rollback)
         {
-            _ = record.NextInt(out var _);
+            if (needOffset)
+            {
+                _ = record.NextInt(out var _);
+            }
+
             _ = record.NextInt(out _transactionNumber);
         }
 
