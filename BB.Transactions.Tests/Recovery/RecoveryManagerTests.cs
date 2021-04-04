@@ -11,6 +11,7 @@ using BB.Transactions.Recovery;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace BB.Transactions.Tests.Recovery
 {
@@ -494,6 +495,13 @@ namespace BB.Transactions.Tests.Recovery
             _ = page.GetInt(0, out var resultValue);
             Assert.AreEqual(222, resultValue);
         }
+
+        [OneTimeTearDown]
+        public void ClearDirectory()
+        {
+            Directory.Delete("DBs", true);
+        }
+
 
         private string RandomFilename => $"{Guid.NewGuid()}.bin";
     }

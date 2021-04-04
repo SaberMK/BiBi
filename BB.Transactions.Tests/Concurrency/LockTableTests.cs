@@ -7,6 +7,7 @@ using BB.Transactions.Concurrency;
 using BB.Transactions.Exceptions;
 using NUnit.Framework;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -179,9 +180,13 @@ namespace BB.Transactions.Tests.Concurrency
                 _lockTable.ExclusiveLock(block);
                 _lockTable.SharedLock(block);
             });
-
         }
 
+        [OneTimeTearDown]
+        public void ClearDirectory()
+        {
+            Directory.Delete("DBs", true);
+        }
         private string RandomFilename => $"{Guid.NewGuid()}.bin";
     }
 }
