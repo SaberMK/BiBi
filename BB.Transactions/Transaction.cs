@@ -3,6 +3,7 @@ using BB.IO.Primitives;
 using BB.Memory.Abstract;
 using BB.Transactions.Abstract;
 using BB.Transactions.Helpers;
+using BB.Transactions.Recovery;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,24 +23,21 @@ namespace BB.Transactions
         public Transaction(
             ITransactionNumberDispatcher numberDispatcher,
             IBufferManager bufferManager, 
-            IRecoveryManager recoveryManager, 
             IConcurrencyManager concurrencyManager,
-            IFileManager fileManager)
+            IFileManager fileManager,
+            ILogManager logManager)
         {
             _numberDispatcher = numberDispatcher;
-            _recoveryManager = recoveryManager;
             _concurrencyManager = concurrencyManager;
             _fileManager = fileManager;
-
             _bufferList = new TransactionBuffersList(bufferManager);
 
             _transactionNumber = _numberDispatcher.GetNextTransactionNumber();
+            _recoveryManager = new RecoveryManager(bufferManager, logManager, _transactionNumber);
         }
 
         public void Commit()
         {
-            // Hmmm... Still think that should unpin buffers that used by current transaction.
-            // But anyway, this transaction contains only used buffers
             _bufferList.UnpinAll();
             _recoveryManager.Commit();
             _concurrencyManager.Release();
@@ -47,8 +45,6 @@ namespace BB.Transactions
 
         public void Rollback()
         {
-            // Hmmm... Still think that should unpin buffers that used by current transaction.
-            // But anyway, this transaction contains only used buffers
             _bufferList.UnpinAll();
             _recoveryManager.Rollback();
             _concurrencyManager.Release();
