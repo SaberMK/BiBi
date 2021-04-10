@@ -4,4 +4,10 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BB.IO\BB.IO.csproj" />
+    <ProjectReference Include="..\BB.Memory\BB.Memory.csproj" />
+    <ProjectReference Include="..\BB.Transactions\BB.Transactions.csproj" />
+  </ItemGroup>
+
 </Project>

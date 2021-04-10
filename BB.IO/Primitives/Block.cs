@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace BB.IO.Primitives
 {
+    // TODO think about making Block a class
     public readonly struct Block : IEquatable<Block>
     {
         public readonly int Id { get; }
