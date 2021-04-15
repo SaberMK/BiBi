@@ -26,9 +26,29 @@ namespace BB.Record.Base
             AddField(fieldName, Base.FieldType.Integer, sizeof(int));
         }
 
+        public void AddByteField(string fieldName)
+        {
+            AddField(fieldName, Base.FieldType.Byte, sizeof(int));
+        }
+
+        public void AddBoolField(string fieldName)
+        {
+            AddField(fieldName, Base.FieldType.Bool, sizeof(int));
+        }
+
+        public void AddBlobField(string fieldName, int length)
+        {
+            AddField(fieldName, Base.FieldType.Blob, length);
+        }
+
+        public void AddDateField(string fieldName)
+        {
+            AddField(fieldName, Base.FieldType.Date, sizeof(long));
+        }
+
         public void AddStringField(string fieldName, int length)
         {
-            AddField(fieldName, Base.FieldType.Integer, sizeof(int)+length);
+            AddField(fieldName, Base.FieldType.String, length);
         }
 
         public void Add(string fieldName, Schema schema)
