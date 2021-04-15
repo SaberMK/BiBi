@@ -55,14 +55,13 @@ namespace BB.Record.Base
                     return sizeof(int);
 
                 case FieldType.Blob or FieldType.String:
-                    return _schema.Length(fieldName);
+                    return sizeof(int) + _schema.Length(fieldName);
 
                 case FieldType.Date:
                     return sizeof(long);
-
-                default:
-                    return -1;
             }
+
+            return -1;
         }
 
         public int RecordLength => _recordLength;
