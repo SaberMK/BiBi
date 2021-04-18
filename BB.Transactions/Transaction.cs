@@ -188,5 +188,8 @@ namespace BB.Transactions
         }
 
         #endregion
+
+        // TODO Remove Later
+        public IFileManager FileManager => _fileManager;
     }
 }
