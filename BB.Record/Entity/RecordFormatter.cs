@@ -46,7 +46,7 @@ namespace BB.Record.Entity
                     // TODO I think that int every time is not needed
 
                     case FieldType.Bool:
-                        page.SetBool(position + sizeof(int) + offset, true);
+                        page.SetBool(position + sizeof(int) + offset, false);
                         break;
 
                     case FieldType.Byte:

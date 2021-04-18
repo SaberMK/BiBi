@@ -41,20 +41,39 @@ namespace BB.Transactions.Concurrency
             if (HasExclusiveLock(block))
                 throw new LockAbortException();
 
+            // TODO shouldn't it be synchronous???
+
             var value = GetLockValue(block) + 1;
             _locks.AddOrUpdate(block, value, (block, val) => value);
         }
 
         public void ExclusiveLock(Block block)
         {
+            // TODO Who should be able to shit on the shared lock? 
+            // ONLY me IF I have this lock?
+
+            // TODO situation:
+            // Transaction appended a block. There is a shared lock on it
+            // Now it tries to write something on it. It cannot - there is an shared lock
+            // But in meantime, if transaction would release lock, someone else could write on it.
+
             long timestamp = DateTime.UtcNow.Ticks;
 
-            while(HaveOtherSharedLocks(block) && !WaitingForTooLong(timestamp))
+            // This line was previously here. Due to I would not implement 4 levels of transaction here, 
+            // would comment it so I would not search for it on git history
+            // while(HaveOtherSharedLocks(block) && !WaitingForTooLong(timestamp))
+
+            while (HasExclusiveLock(block) && !WaitingForTooLong(timestamp))
             {
                 Thread.Sleep(_tickWaitingTime);
             }
 
-            if (HaveOtherSharedLocks(block))
+
+            // This line was previously here. Due to I would not implement 4 levels of transaction here, 
+            // would comment it so I would not search for it on git history
+            // if (HaveOtherSharedLocks(block))
+
+            if (HasExclusiveLock(block))
                 throw new LockAbortException();
 
             _locks.AddOrUpdate(block, -1, (_, value) => -1);
@@ -88,10 +107,12 @@ namespace BB.Transactions.Concurrency
             return GetLockValue(block) < 0;
         }
 
-        private bool HaveOtherSharedLocks(Block block)
-        {
-            return GetLockValue(block) > 0;
-        }
+        // TODO uncomment it when/if it would matter
+
+        //private bool HaveOtherSharedLocks(Block block)
+        //{
+        //    return GetLockValue(block) > 0;
+        //}
 
         private int GetLockValue(Block block)
         {
