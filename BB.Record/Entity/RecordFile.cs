@@ -35,12 +35,12 @@ namespace BB.Record.Entity
             _recordPage.Close();
         }
 
-        private void BeforeFirst()
+        public void BeforeFirst()
         {
             MoveTo(0);
         }
 
-        private Boolean Next()
+        public bool Next()
         {
             while(true)
             {

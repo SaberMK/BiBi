@@ -71,8 +71,10 @@ namespace BB.Transactions
             var dummyBlock = new Block(filename, -1);
 
             _concurrencyManager.SharedLock(dummyBlock);
+            
+            var length = _fileManager.Length(filename);
 
-            return _fileManager.Length(filename);
+            return length;
         }
 
         public Block Append(string filename, IPageFormatter pageFormatter)
@@ -83,7 +85,6 @@ namespace BB.Transactions
             _concurrencyManager.ExclusiveLock(dummyBlock);
 
             var lastBlock = _bufferList.PinNew(filename, pageFormatter);
-            Unpin(lastBlock);
 
             return lastBlock;
         }

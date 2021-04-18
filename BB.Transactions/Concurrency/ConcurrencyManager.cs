@@ -71,7 +71,7 @@ namespace BB.Transactions.Concurrency
         private bool HasExclusiveLock(Block block)
         {
             var hasLock = _locks.TryGetValue(block, out var value);
-            return !hasLock && value == ConcurrencyLockType.Exclusive;
+            return !hasLock && value != ConcurrencyLockType.Exclusive;
         }
 
         internal enum ConcurrencyLockType : byte
