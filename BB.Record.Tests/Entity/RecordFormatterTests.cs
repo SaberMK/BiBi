@@ -33,9 +33,121 @@ namespace BB.Record.Tests.Entity
         [Test]
         public void CanCreateRecordFormatter()
         {
+            _tableInfo = new TableInfo(RandomFilename, _schema);
             Assert.DoesNotThrow(() =>
             {
-                _recordFormatter = new RecordFormatter()
+                _recordFormatter = new RecordFormatter(_tableInfo, _fileManager);
+            });
+        }
+
+        [Test]
+        public void CanFormatPageWithNoRecordsInside()
+        {
+            _tableInfo = new TableInfo(RandomFilename, _schema);
+            _recordFormatter = new RecordFormatter(_tableInfo, _fileManager);
+            var page = _fileManager.ResolvePage();
+
+            Assert.DoesNotThrow(() =>
+            {
+                _recordFormatter.Format(page);
+            });
+        }
+
+        [Test]
+        public void CanFormatPageWithOneIntFieldInside()
+        {
+            _schema.AddIntField("field");
+
+            _tableInfo = new TableInfo(RandomFilename, _schema);
+            _recordFormatter = new RecordFormatter(_tableInfo, _fileManager);
+
+            var page = _fileManager.ResolvePage();
+
+            Assert.DoesNotThrow(() =>
+            {
+                _recordFormatter.Format(page);
+            });
+        }
+
+        [Test]
+        public void CanFormatPageWithOneBoolFieldInside()
+        {
+            _schema.AddBoolField("field");
+
+            _tableInfo = new TableInfo(RandomFilename, _schema);
+            _recordFormatter = new RecordFormatter(_tableInfo, _fileManager);
+
+            var page = _fileManager.ResolvePage();
+
+            Assert.DoesNotThrow(() =>
+            {
+                _recordFormatter.Format(page);
+            });
+        }
+
+
+        [Test]
+        public void CanFormatPageWithOneByteFieldInside()
+        {
+            _schema.AddByteField("field");
+
+            _tableInfo = new TableInfo(RandomFilename, _schema);
+            _recordFormatter = new RecordFormatter(_tableInfo, _fileManager);
+
+            var page = _fileManager.ResolvePage();
+
+            Assert.DoesNotThrow(() =>
+            {
+                _recordFormatter.Format(page);
+            });
+        }
+
+
+        [Test]
+        public void CanFormatPageWithOneBlobFieldInside()
+        {
+            _schema.AddBlobField("field", 30);
+
+            _tableInfo = new TableInfo(RandomFilename, _schema);
+            _recordFormatter = new RecordFormatter(_tableInfo, _fileManager);
+
+            var page = _fileManager.ResolvePage();
+
+            Assert.DoesNotThrow(() =>
+            {
+                _recordFormatter.Format(page);
+            });
+        }
+
+        [Test]
+        public void CanFormatPageWithOneStringFieldInside()
+        {
+            _schema.AddStringField("field", 30);
+
+            _tableInfo = new TableInfo(RandomFilename, _schema);
+            _recordFormatter = new RecordFormatter(_tableInfo, _fileManager);
+
+            var page = _fileManager.ResolvePage();
+
+            Assert.DoesNotThrow(() =>
+            {
+                _recordFormatter.Format(page);
+            });
+        }
+
+        [Test]
+        public void CanFormatPageWithOneDateFieldInside()
+        {
+            _schema.AddDateField("field");
+
+            _tableInfo = new TableInfo(RandomFilename, _schema);
+            _recordFormatter = new RecordFormatter(_tableInfo, _fileManager);
+
+            var page = _fileManager.ResolvePage();
+
+            Assert.DoesNotThrow(() =>
+            {
+                _recordFormatter.Format(page);
             });
         }
 
