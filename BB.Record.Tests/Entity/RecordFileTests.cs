@@ -212,6 +212,188 @@ namespace BB.Record.Tests.Entity
             Assert.AreEqual(new DateTime(2020, 1, 1), value);
         }
 
+        [Test]
+        public void CanReadWrittenIntRecord()
+        {
+            var tableFile = RandomFilename;
+            var schema = new Schema();
+            schema.AddIntField("field");
+            _tableInfo = new TableInfo(tableFile, schema);
+
+            _recordFile = new RecordFile(_tableInfo, _transaction);
+            _recordFile.MoveToRID(new RID(0, 0));
+            _recordFile.SetInt("field", 10);
+            _recordFile.Close();
+
+            _transaction.Commit();
+
+            var cm = new ConcurrencyManager();
+            var newTr = new Transaction(_dispatcher, _bufferManager, cm, _fileManager, _logManager);
+
+            var rf = new RecordFile(_tableInfo, newTr);
+            rf.MoveToRID(new RID(0, 0));
+            var value = rf.GetInt("field");
+
+            Assert.AreEqual(10, value);
+        }
+
+        [Test]
+        public void CanReadWrittenByteRecord()
+        {
+            var tableFile = RandomFilename;
+            var schema = new Schema();
+            schema.AddByteField("field");
+            _tableInfo = new TableInfo(tableFile, schema);
+
+            _recordFile = new RecordFile(_tableInfo, _transaction);
+            _recordFile.MoveToRID(new RID(0, 0));
+            _recordFile.SetByte("field", 10);
+            _recordFile.Close();
+
+            _transaction.Commit();
+
+            var cm = new ConcurrencyManager();
+            var newTr = new Transaction(_dispatcher, _bufferManager, cm, _fileManager, _logManager);
+
+            var rf = new RecordFile(_tableInfo, newTr);
+            rf.MoveToRID(new RID(0, 0));
+            var value = rf.GetByte("field");
+
+            Assert.AreEqual(10, value);
+        }
+
+        [Test]
+        public void CanReadWrittenBoolRecord()
+        {
+            var tableFile = RandomFilename;
+            var schema = new Schema();
+            schema.AddBoolField("field");
+            _tableInfo = new TableInfo(tableFile, schema);
+
+            _recordFile = new RecordFile(_tableInfo, _transaction);
+            _recordFile.MoveToRID(new RID(0, 0));
+            _recordFile.SetBool("field", true);
+            _recordFile.Close();
+
+            _transaction.Commit();
+
+            var cm = new ConcurrencyManager();
+            var newTr = new Transaction(_dispatcher, _bufferManager, cm, _fileManager, _logManager);
+
+            var rf = new RecordFile(_tableInfo, newTr);
+            rf.MoveToRID(new RID(0, 0));
+            var value = rf.GetBool("field");
+
+            Assert.AreEqual(true, value);
+        }
+
+        [Test]
+        public void CanReadWrittenBlobRecord()
+        {
+            var tableFile = RandomFilename;
+            var schema = new Schema();
+            schema.AddBlobField("field", 40);
+            _tableInfo = new TableInfo(tableFile, schema);
+
+            _recordFile = new RecordFile(_tableInfo, _transaction);
+            _recordFile.MoveToRID(new RID(0, 0));
+            _recordFile.SetBlob("field", new byte[] { 1, 2, 3, 4, 5 });
+            _recordFile.Close();
+
+            _transaction.Commit();
+
+            var cm = new ConcurrencyManager();
+            var newTr = new Transaction(_dispatcher, _bufferManager, cm, _fileManager, _logManager);
+
+            var rf = new RecordFile(_tableInfo, newTr);
+            rf.MoveToRID(new RID(0, 0));
+            var value = rf.GetBlob("field");
+
+            Assert.AreEqual(new byte[] { 1, 2, 3, 4, 5 }, value);
+        }
+
+        [Test]
+        public void CanReadWrittenStringRecord()
+        {
+            var tableFile = RandomFilename;
+            var schema = new Schema();
+            schema.AddStringField("field", 40);
+            _tableInfo = new TableInfo(tableFile, schema);
+
+            _recordFile = new RecordFile(_tableInfo, _transaction);
+            _recordFile.MoveToRID(new RID(0, 0));
+            _recordFile.SetString("field", "huge string lol");
+            _recordFile.Close();
+
+            _transaction.Commit();
+
+            var cm = new ConcurrencyManager();
+            var newTr = new Transaction(_dispatcher, _bufferManager, cm, _fileManager, _logManager);
+
+            var rf = new RecordFile(_tableInfo, newTr);
+            rf.MoveToRID(new RID(0, 0));
+            var value = rf.GetString("field");
+
+            Assert.AreEqual("huge string lol", value);
+        }
+
+        [Test]
+        public void CanReadWrittenDateRecord()
+        {
+            var tableFile = RandomFilename;
+            var schema = new Schema();
+            schema.AddDateField("field");
+            _tableInfo = new TableInfo(tableFile, schema);
+
+            _recordFile = new RecordFile(_tableInfo, _transaction);
+            _recordFile.MoveToRID(new RID(0, 0));
+            _recordFile.SetDate("field", new DateTime(2020, 1, 1));
+            _recordFile.Close();
+
+            _transaction.Commit();
+
+            var cm = new ConcurrencyManager();
+            var newTr = new Transaction(_dispatcher, _bufferManager, cm, _fileManager, _logManager);
+
+            var rf = new RecordFile(_tableInfo, newTr);
+            rf.MoveToRID(new RID(0, 0));
+            var value = rf.GetDate("field");
+
+            Assert.AreEqual(new DateTime(2020, 1, 1), value);
+        }
+
+        [Test]
+        public void CanPlaceAndReadACoupleOfRecords()
+        {
+            var tableFile = RandomFilename;
+            var schema = new Schema();
+            schema.AddIntField("field");
+            _tableInfo = new TableInfo(tableFile, schema);
+
+            _recordFile = new RecordFile(_tableInfo, _transaction);
+            _recordFile.MoveToRID(new RID(0, 0));
+            _recordFile.SetInt("field", 10);
+
+            //TODO think about it
+            _recordFile.Insert();
+            _recordFile.SetInt("field", 20);
+            _recordFile.Close();
+
+            _transaction.Commit();
+
+            var cm = new ConcurrencyManager();
+            var newTr = new Transaction(_dispatcher, _bufferManager, cm, _fileManager, _logManager);
+
+            var rf = new RecordFile(_tableInfo, newTr);
+            rf.MoveToRID(new RID(0, 0));
+            var value = rf.GetInt("field");
+            rf.Next();
+            var value2 = rf.GetInt("field");
+
+            Assert.AreEqual(10, value);
+            Assert.AreEqual(20, value2);
+        }
+
         [OneTimeTearDown]
         public void ClearDirectory()
         {
