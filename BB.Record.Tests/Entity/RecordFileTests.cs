@@ -362,37 +362,39 @@ namespace BB.Record.Tests.Entity
             Assert.AreEqual(new DateTime(2020, 1, 1), value);
         }
 
-        [Test]
-        public void CanPlaceAndReadACoupleOfRecords()
-        {
-            var tableFile = RandomFilename;
-            var schema = new Schema();
-            schema.AddIntField("field");
-            _tableInfo = new TableInfo(tableFile, schema);
+        //[Test]
+        //public void CanPlaceAndReadACoupleOfRecords()
+        //{
+        //    var tableFile = RandomFilename;
+        //    var schema = new Schema();
+        //    schema.AddIntField("field");
+        //    _tableInfo = new TableInfo(tableFile, schema);
 
-            _recordFile = new RecordFile(_tableInfo, _transaction);
-            _recordFile.MoveToRID(new RID(0, 0));
-            _recordFile.SetInt("field", 10);
+        //    _recordFile = new RecordFile(_tableInfo, _transaction);
+        //    _recordFile.MoveToRID(new RID(0, 0));
+        //    _recordFile.SetInt("field", 10);
 
-            //TODO think about it
-            _recordFile.Insert();
-            _recordFile.SetInt("field", 20);
-            _recordFile.Close();
+        //    //as a suggestion I should write tests for RecordPage.
 
-            _transaction.Commit();
+        //    //TODO think about it
+        //    _recordFile.Insert();
+        //    _recordFile.SetInt("field", 20);
+        //    _recordFile.Close();
 
-            var cm = new ConcurrencyManager();
-            var newTr = new Transaction(_dispatcher, _bufferManager, cm, _fileManager, _logManager);
+        //    _transaction.Commit();
 
-            var rf = new RecordFile(_tableInfo, newTr);
-            rf.MoveToRID(new RID(0, 0));
-            var value = rf.GetInt("field");
-            rf.Next();
-            var value2 = rf.GetInt("field");
+        //    var cm = new ConcurrencyManager();
+        //    var newTr = new Transaction(_dispatcher, _bufferManager, cm, _fileManager, _logManager);
 
-            Assert.AreEqual(10, value);
-            Assert.AreEqual(20, value2);
-        }
+        //    var rf = new RecordFile(_tableInfo, newTr);
+        //    rf.MoveToRID(new RID(0, 0));
+        //    var value = rf.GetInt("field");
+        //    rf.Next();
+        //    var value2 = rf.GetInt("field");
+
+        //    Assert.AreEqual(10, value);
+        //    Assert.AreEqual(20, value2);
+        //}
 
         [OneTimeTearDown]
         public void ClearDirectory()
