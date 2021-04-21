@@ -154,11 +154,12 @@ namespace BB.Transactions.Tests.Concurrency
         }
 
         [Test]
-        public void ThrowsExceptionIfExclusiveLockWasNotReceivedBecauseAlreadHadShared()
+        public void NotThrowsExceptionIfExclusiveLockWasNotReceivedBecauseAlreadHadShared()
         {
             _lockTable = new LockTable(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(100));
 
-            Assert.Throws<LockAbortException>(() =>
+            //Assert.Throws<LockAbortException>(() =>
+            Assert.DoesNotThrow(() =>
             {
                 var block = new Block(RandomFilename, 0);
 

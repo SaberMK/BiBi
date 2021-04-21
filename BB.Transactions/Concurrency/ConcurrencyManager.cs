@@ -7,6 +7,10 @@ using System.Text;
 
 namespace BB.Transactions.Concurrency
 {
+    /// <summary>
+    /// TODO: This manager got completely broken because I completely fucked up
+    /// concurrency
+    /// </summary>
     public class ConcurrencyManager : IConcurrencyManager
     {
         private readonly LockTable _lockTable;
@@ -45,6 +49,12 @@ namespace BB.Transactions.Concurrency
         {
             lock (_lock)
             {
+                // We should not set shared lock again if we have already taken it
+                if (_locks.ContainsKey(block))
+                {
+                    return;
+                }
+
                 if (!HasExclusiveLock(block))
                 {
                     _lockTable.ExclusiveLock(block);
