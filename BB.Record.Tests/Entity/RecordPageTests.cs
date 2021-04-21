@@ -236,6 +236,150 @@ namespace BB.Record.Tests.Entity
             Assert.AreEqual(new DateTime(2020, 1, 1), value);
         }
 
+        [Test]
+        public void CanReadIntFromRecord()
+        {
+            var fn = RandomFilename;
+            var block = new Block(fn, 0);
+
+            var sch = new Schema();
+            sch.AddIntField("field");
+
+            var page = _fileManager.ResolvePage(block);
+            page.Read(block);
+
+            page.SetInt(0, 4);
+            page.SetInt(4, 10);
+
+            page.Write(block);
+
+            recordPage = new RecordPage(block, _tableInfo, _transaction, _fileManager);
+            recordPage.MoveToId(0);
+            var value = recordPage.GetInt("field");
+
+            Assert.AreEqual(10, value);
+        }
+
+        [Test]
+        public void CanReadByteFromRecord()
+        {
+            var fn = RandomFilename;
+            var block = new Block(fn, 0);
+
+            var sch = new Schema();
+            sch.AddByteField("field");
+
+            var page = _fileManager.ResolvePage(block);
+            page.Read(block);
+
+            page.SetInt(0, 4);
+            page.SetByte(4, 10);
+
+            page.Write(block);
+
+            recordPage = new RecordPage(block, _tableInfo, _transaction, _fileManager);
+            recordPage.MoveToId(0);
+            var value = recordPage.GetByte("field");
+
+            Assert.AreEqual(10, value);
+        }
+
+        [Test]
+        public void CanReadBoolFromRecord()
+        {
+            var fn = RandomFilename;
+            var block = new Block(fn, 0);
+
+            var sch = new Schema();
+            sch.AddBoolField("field");
+
+            var page = _fileManager.ResolvePage(block);
+            page.Read(block);
+
+            page.SetInt(0, 4);
+            page.SetBool(4, true);
+
+            page.Write(block);
+
+            recordPage = new RecordPage(block, _tableInfo, _transaction, _fileManager);
+            recordPage.MoveToId(0);
+            var value = recordPage.GetBool("field");
+
+            Assert.AreEqual(true, value);
+        }
+
+        [Test]
+        public void CanReadBlobFromRecord()
+        {
+            var fn = RandomFilename;
+            var block = new Block(fn, 0);
+
+            var sch = new Schema();
+            sch.AddBlobField("field", 30);
+
+            var page = _fileManager.ResolvePage(block);
+            page.Read(block);
+
+            page.SetInt(0, 4);
+            page.SetBlob(4, new byte[] { 1, 2, 3 });
+
+            page.Write(block);
+
+            recordPage = new RecordPage(block, _tableInfo, _transaction, _fileManager);
+            recordPage.MoveToId(0);
+            var value = recordPage.GetBlob("field");
+
+            Assert.AreEqual(new byte[] { 1, 2, 3 }, value);
+        }
+
+        [Test]
+        public void CanReadStringFromRecord()
+        {
+            var fn = RandomFilename;
+            var block = new Block(fn, 0);
+
+            var sch = new Schema();
+            sch.AddStringField("field", 30);
+
+            var page = _fileManager.ResolvePage(block);
+            page.Read(block);
+
+            page.SetInt(0, 4);
+            page.SetString(4, "123");
+
+            page.Write(block);
+
+            recordPage = new RecordPage(block, _tableInfo, _transaction, _fileManager);
+            recordPage.MoveToId(0);
+            var value = recordPage.GetString("field");
+
+            Assert.AreEqual("123", value);
+        }
+
+        [Test]
+        public void CanReadDateFromRecord()
+        {
+            var fn = RandomFilename;
+            var block = new Block(fn, 0);
+
+            var sch = new Schema();
+            sch.AddDateField("field");
+
+            var page = _fileManager.ResolvePage(block);
+            page.Read(block);
+
+            page.SetInt(0, 4);
+            page.SetDate(4, new DateTime(2020, 1, 1));
+
+            page.Write(block);
+
+            recordPage = new RecordPage(block, _tableInfo, _transaction, _fileManager);
+            recordPage.MoveToId(0);
+            var value = recordPage.GetDate("field");
+
+            Assert.AreEqual(new DateTime(2020, 1, 1), value);
+        }
+
         [OneTimeTearDown]
         public void ClearDirectory()
         {
