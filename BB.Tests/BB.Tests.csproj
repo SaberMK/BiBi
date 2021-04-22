@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.16.1" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BB.Compiler\BB.Compiler.csproj" />
+    <ProjectReference Include="..\BB.Core\BB.Core.csproj" />
+    <ProjectReference Include="..\BB.Host\BB.Host.csproj" />
+    <ProjectReference Include="..\BB.IO\BB.IO.csproj" />
+    <ProjectReference Include="..\BB.Memory\BB.Memory.csproj" />
+    <ProjectReference Include="..\BB.Record\BB.Record.csproj" />
+    <ProjectReference Include="..\BB.Tokenizer\BB.Tokenizer.csproj" />
+    <ProjectReference Include="..\BB.Transactions\BB.Transactions.csproj" />
+    <ProjectReference Include="..\BB.Utils\BB.Utils.csproj" />
+  </ItemGroup>
+
+</Project>
