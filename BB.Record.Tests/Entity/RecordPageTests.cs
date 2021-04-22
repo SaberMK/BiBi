@@ -380,6 +380,32 @@ namespace BB.Record.Tests.Entity
             Assert.AreEqual(new DateTime(2020, 1, 1), value);
         }
 
+        [Test]
+        public void CanDeleteRecord()
+        {
+            var fn = RandomFilename;
+            var block = new Block(fn, 0);
+
+            recordPage = new RecordPage(block, _tableInfo, _transaction, _fileManager);
+            var canInsert = recordPage.Insert();
+            recordPage.SetInt("field", 20);
+            recordPage.Delete();
+            recordPage.Close();
+            _transaction.Commit();
+
+            var page = _fileManager.ResolvePage(block);
+            page.Read(block);
+
+            page.GetInt(0, out var isUsed);
+            page.GetInt(4, out var value);
+
+            Assert.IsTrue(canInsert);
+            Assert.AreEqual(0, isUsed);
+
+            // It is "soft delete" - we are not changing the value
+            Assert.AreEqual(20, value);
+        }
+
         [OneTimeTearDown]
         public void ClearDirectory()
         {

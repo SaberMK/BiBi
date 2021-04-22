@@ -134,7 +134,7 @@ namespace BB.Transactions.Tests.Concurrency
         [Test]
         public void CanWaitForExclusiveLockIfHaveExclusive()
         {
-            _lockTable = new LockTable(TimeSpan.FromSeconds(10), TimeSpan.FromMilliseconds(100));
+            _lockTable = new LockTable(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(100));
 
             Assert.DoesNotThrow(() =>
             {
@@ -148,6 +148,21 @@ namespace BB.Transactions.Tests.Concurrency
                     _lockTable.Unlock(block);
                 });
 
+                _lockTable.ExclusiveLock(block);
+                _lockTable.Unlock(block);
+            });
+        }
+
+        [Test]
+        public void CannotWaitForExclusiveLockIfHaveExclusive()
+        {
+            _lockTable = new LockTable(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(100));
+
+            Assert.Throws<LockAbortException>(() =>
+            {
+                var block = new Block(RandomFilename, 0);
+
+                _lockTable.ExclusiveLock(block);
                 _lockTable.ExclusiveLock(block);
                 _lockTable.Unlock(block);
             });
