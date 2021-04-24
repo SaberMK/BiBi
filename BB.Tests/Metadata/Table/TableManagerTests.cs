@@ -45,7 +45,6 @@ namespace BB.Tests.Metadata.Table
             _dispatcher = new TransactionNumberDispatcher(10);
             _concurrencyManager = new ConcurrencyManager();
             _transaction = new Transaction(_dispatcher, _bufferManager, _concurrencyManager, _fileManager, _logManager);
-
         }
 
         [Test]
@@ -95,9 +94,6 @@ namespace BB.Tests.Metadata.Table
 
             Assert.AreEqual("table1", tableName);
             Assert.AreEqual(new TableInfo("table1", schema).RecordLength, recordLength);
-            //var tableMetadataBlock = new Block(tableMetadataStorageFilename + ".tbl", 0);
-            //var tableMetadataPage = _fileManager.ResolvePage();
-            //tableMetadataPage.Read(tableMetadataBlock);
 
             var fieldCatalogSchema = new Schema();
             fieldCatalogSchema.AddStringField("tblname", TableManager.MAX_NAME_LENGTH);
@@ -242,6 +238,32 @@ namespace BB.Tests.Metadata.Table
             Assert.AreEqual(FieldType.Integer, field1.Type);
             Assert.AreEqual(FieldType.Blob, field2.Type);
             Assert.AreEqual(40, field2.Length);
+        }
+
+        [Test]
+        public void WouldGetNullIfTableWasNotFound()
+        {
+            var tableMetadataStorageFilename = RandomFilename;
+            var fieldMetadataStorageFilename = RandomFilename;
+
+            tableManager = new TableManager(true, _transaction, tableMetadataStorageFilename, fieldMetadataStorageFilename);
+            var schema = new Schema();
+
+            schema.AddIntField("field1");
+            schema.AddBlobField("field2", 40);
+
+            tableManager.CreateTable("table1", schema, _transaction);
+
+            _transaction.Commit();
+
+            _concurrencyManager = new ConcurrencyManager();
+            _transaction = new Transaction(_dispatcher, _bufferManager, _concurrencyManager, _fileManager, _logManager);
+
+            tableManager = new TableManager(false, _transaction, tableMetadataStorageFilename, fieldMetadataStorageFilename);
+
+            var tableInfo = tableManager.GetTableInfo("table2", _transaction);
+
+            Assert.IsNull(tableInfo);
         }
 
         private string RandomFilename => $"{Guid.NewGuid()}.bin";
