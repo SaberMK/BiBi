@@ -1,4 +1,7 @@
-﻿using BB.Record.Base;
+﻿using BB.Metadata.Indexes;
+using BB.Metadata.Statistic;
+using BB.Record.Base;
+using BB.Transactions;
 using BB.Transactions.Abstract;
 using System;
 using System.Collections.Generic;
@@ -10,15 +13,17 @@ namespace BB.Metadata.Abstract
 {
     public interface IMetadataManager
     {
-        void CreateTable(string tableName, Schema schema, ITransaction transaction);
-        TableInfo GetTableInfo(string tableName, ITransaction transaction);
+        void CreateTable(string tableName, Schema schema, Transaction transaction);
+        TableInfo GetTableInfo(string tableName, Transaction transaction);
 
-        void CreateView(string viewName, string viewDefinition, ITransaction transaction);
-        string GetViewDefinition(string viewName, ITransaction transaction);
+        void CreateView(string viewName, string viewDefinition, Transaction transaction);
+        string GetViewDefinition(string viewName, Transaction transaction);
 
-        void CreateIndex(string indexName, string tableName, string fieldName, ITransaction transaction);
-        Dictionary<string, TableInfo> GetIndexInfo(string tableName, ITransaction transaction);
+        void CreateIndex(string indexName, string tableName, string fieldName, Transaction transaction);
+        Dictionary<string, IndexInfo> GetIndexInfo(string tableName, Transaction transaction);
 
-        TableInfo GetStatisticsInfo(string tableName, TableInfo tableInfo, ITransaction transaction);
+        StatisticalInfo GetStatisticsInfo(string tableName, Transaction transaction);
+
+        int BlockSize { get; }
     }
 }
