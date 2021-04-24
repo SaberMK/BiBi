@@ -362,39 +362,140 @@ namespace BB.Tests.Record.Entity
             Assert.AreEqual(new DateTime(2020, 1, 1), value);
         }
 
-        //[Test]
-        //public void CanPlaceAndReadACoupleOfRecords()
-        //{
-        //    var tableFile = RandomFilename;
-        //    var schema = new Schema();
-        //    schema.AddIntField("field");
-        //    _tableInfo = new TableInfo(tableFile, schema);
+        [Test]
+        public void CanGetBeforeFirstAndInsertValues()
+        {
+            var tableFile = RandomFilename;
+            var schema = new Schema();
+            schema.AddIntField("field");
+            _tableInfo = new TableInfo(tableFile, schema);
 
-        //    _recordFile = new RecordFile(_tableInfo, _transaction);
-        //    _recordFile.MoveToRID(new RID(0, 0));
-        //    _recordFile.SetInt("field", 10);
+            _recordFile = new RecordFile(_tableInfo, _transaction);
 
-        //    //as a suggestion I should write tests for RecordPage.
+            _recordFile.BeforeFirst();
 
-        //    //TODO think about it
-        //    _recordFile.Insert();
-        //    _recordFile.SetInt("field", 20);
-        //    _recordFile.Close();
+            _recordFile.Insert();
+            _recordFile.SetInt("field", 10);
 
-        //    _transaction.Commit();
+            _recordFile.Insert();
+            _recordFile.SetInt("field", 20);
 
-        //    var cm = new ConcurrencyManager();
-        //    var newTr = new Transaction(_dispatcher, _bufferManager, cm, _fileManager, _logManager);
+            _transaction.Commit();
 
-        //    var rf = new RecordFile(_tableInfo, newTr);
-        //    rf.MoveToRID(new RID(0, 0));
-        //    var value = rf.GetInt("field");
-        //    rf.Next();
-        //    var value2 = rf.GetInt("field");
+            var block = new IO.Primitives.Block(tableFile + ".tbl", 0);
+            var page = _fileManager.ResolvePage(block);
+            page.Read(block);
 
-        //    Assert.AreEqual(10, value);
-        //    Assert.AreEqual(20, value2);
-        //}
+            page.GetInt(0, out var used1);
+            page.GetInt(8, out var used2);
+
+
+            page.GetInt(4, out var value1);
+            page.GetInt(12, out var value2);
+
+            Assert.AreEqual(1, used1);
+            Assert.AreEqual(1, used2);
+
+            Assert.AreEqual(10, value1);
+            Assert.AreEqual(20, value2);
+        }
+
+        [Test]
+        public void CanDeleteRecord()
+        {
+            var tableFile = RandomFilename;
+            var schema = new Schema();
+            schema.AddIntField("field");
+            _tableInfo = new TableInfo(tableFile, schema);
+
+            _recordFile = new RecordFile(_tableInfo, _transaction);
+
+            _recordFile.BeforeFirst();
+
+            _recordFile.Insert();
+            _recordFile.SetInt("field", 10);
+
+            _recordFile.Delete();
+
+            _transaction.Commit();
+
+            var block = new IO.Primitives.Block(tableFile + ".tbl", 0);
+            var page = _fileManager.ResolvePage(block);
+            page.Read(block);
+
+            page.GetInt(0, out var used);
+            Assert.AreEqual(0, used);
+        }
+
+        [Test]
+        public void CanInsertMoreThanForOnePage()
+        {
+            var tableFile = RandomFilename;
+            var schema = new Schema();
+            schema.AddIntField("field");
+            _tableInfo = new TableInfo(tableFile, schema);
+
+            _recordFile = new RecordFile(_tableInfo, _transaction);
+
+            _recordFile.BeforeFirst();
+
+            for (int i = 0; i < 12; ++i)
+            {
+                _recordFile.Insert();
+            }
+
+            // And this folk would go to the next page
+            _recordFile.Insert();
+
+            var rid = _recordFile.CurrentRID;
+            Assert.AreEqual(1, rid.BlockNumber);
+            Assert.AreEqual(0, rid.Id);
+        }
+
+        [Test]
+        public void CanNavigateThourghExistingRecordsMoreRecords()
+        {
+            var tableFile = RandomFilename;
+            var schema = new Schema();
+            schema.AddIntField("field");
+            _tableInfo = new TableInfo(tableFile, schema);
+
+            _recordFile = new RecordFile(_tableInfo, _transaction);
+
+            _recordFile.BeforeFirst();
+
+            for (int i = 0; i < 12; ++i)
+            {
+                _recordFile.Insert();
+                _recordFile.SetInt("field", i);
+            }
+
+            // And this folk would go to the next page
+            _recordFile.Insert();
+            _recordFile.SetInt("field", 123);
+
+            _transaction.Commit();
+
+            var cm = new ConcurrencyManager();
+            var newTr = new Transaction(_dispatcher, _bufferManager, cm, _fileManager, _logManager);
+
+            var rf = new RecordFile(_tableInfo, newTr);
+            rf.BeforeFirst();
+
+            for (int i = 0; i < 12; ++i)
+            {
+                rf.Next();
+                var value = rf.GetInt("field");
+                Assert.AreEqual(i, value);
+            }
+
+            rf.Next();
+            var lastValue = rf.GetInt("field");
+            Assert.AreEqual(123, lastValue);
+
+            var canMoveNext = rf.Next();
+            Assert.IsFalse(canMoveNext);
+        }
 
         [OneTimeTearDown]
         public void ClearDirectory()

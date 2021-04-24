@@ -264,7 +264,7 @@ namespace BB.Tests.Transactions
 
             Assert.IsTrue(canRead);
             Assert.AreEqual(123, value);
-            Assert.AreEqual(100, length);
+            Assert.AreEqual(1, length);
         }
 
         [Test]

@@ -121,7 +121,7 @@ namespace BB.Record.Entity
         {
             while(!_recordPage.Insert())
             {
-                if(AtLastBlock)
+                if (AtLastBlock)
                 {
                     AppendBlock();
                 }
@@ -140,7 +140,9 @@ namespace BB.Record.Entity
         private void MoveTo(int blockId)
         {
             if (_recordPage != null)
+            {
                 _recordPage.Close();
+            }
 
             _currentBlockNumber = blockId;
             Block block = new Block(_filename, _currentBlockNumber);

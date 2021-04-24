@@ -23,7 +23,7 @@ namespace BB.Record.Entity
         private int _slotSize;
         private int _currentSlot = -1;
 
-        public RecordPage(Block block, TableInfo tableInfo, Transaction transaction, IFileManager fileManager)
+        public RecordPage(Block block, TableInfo tableInfo, Transaction transaction, IFileManager fileManager, int currentSlot = -1)
         {
             _block = block;
             _tableInfo = tableInfo;
@@ -32,6 +32,8 @@ namespace BB.Record.Entity
 
             _transaction.Pin(_block.Value);
             _slotSize = _tableInfo.RecordLength + sizeof(int);
+
+            _currentSlot = currentSlot;
         }
 
         public void Close()

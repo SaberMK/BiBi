@@ -55,11 +55,11 @@ namespace BB.Transactions.Concurrency
                     return;
                 }
 
-                if (!HasExclusiveLock(block))
-                {
+                //if (!HasExclusiveLock(block))
+                //{
                     _lockTable.ExclusiveLock(block);
                     _locks[block] = ConcurrencyLockType.Exclusive;
-                }
+                //}
             }
         }
 
@@ -78,11 +78,11 @@ namespace BB.Transactions.Concurrency
             }
         }
 
-        private bool HasExclusiveLock(Block block)
-        {
-            var hasLock = _locks.TryGetValue(block, out var value);
-            return !hasLock && value != ConcurrencyLockType.Exclusive;
-        }
+        //private bool HasExclusiveLock(Block block)
+        //{
+        //    var hasLock = _locks.TryGetValue(block, out var value);
+        //    return !hasLock && value != ConcurrencyLockType.Exclusive;
+        //}
 
         internal enum ConcurrencyLockType : byte
         {
