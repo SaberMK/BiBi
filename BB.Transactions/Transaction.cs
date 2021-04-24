@@ -72,8 +72,8 @@ namespace BB.Transactions
 
             _concurrencyManager.SharedLock(dummyBlock);
             
-            var length = _fileManager.Length(filename);
-
+            var length = _fileManager.Length(filename) / _fileManager.BlockSize;
+            
             return length;
         }
 
