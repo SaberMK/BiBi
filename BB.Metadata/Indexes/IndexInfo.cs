@@ -17,7 +17,7 @@ namespace BB.Metadata.Indexes
         private readonly string _indexName;
         private readonly string _fieldName;
 
-        // Would become in handy later when index types woudl be > 1 
+        // Would become in handy later when index types would be > 1 
         private readonly int _indexType;
 
         private readonly Transaction _transaction;

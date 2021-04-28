@@ -19,7 +19,7 @@ namespace BB.Metadata.Indexes.Implementations
         public static int SearchCost(int blocksCount, int recordsPerBlock)
         {
             // TODO
-            return default;
+            return 0;
         }
     }
 }
