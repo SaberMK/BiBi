@@ -22,6 +22,7 @@ namespace BB.Metadata.Statistic
 
         public StatisticsManager(IMetadataManager metadataManager, Transaction transaction, int statisticCallsBeforeUpdateCount = 100)
         {
+            _metadataManager = metadataManager;
             _statisticCallsBeforeUpdateCount = statisticCallsBeforeUpdateCount;
             _tableStats = new Dictionary<string, StatisticalInfo>();
 

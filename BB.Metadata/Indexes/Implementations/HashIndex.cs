@@ -15,5 +15,12 @@ namespace BB.Metadata.Indexes.Implementations
         {
             // TODO
         }
+
+
+        public static int SearchCost(int blocksCount, int recordsPerBlock)
+        {
+            // TODO
+            return 0;
+        }
     }
 }
