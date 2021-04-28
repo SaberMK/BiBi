@@ -33,7 +33,7 @@ namespace BB.Metadata.Indexes
             _metadataManager = metadataManager;
 
             _tableInfo = _metadataManager.GetTableInfo(tableName, transaction);
-            _statInfo = _metadataManager.GetStatisticsInfo(tableName, _tableInfo, transaction);
+            _statInfo = _metadataManager.GetStatisticsInfo(tableName, transaction);
         }
 
         public BaseIndex Open()
