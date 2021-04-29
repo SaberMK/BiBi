@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BB.Metadata.Statistic
 {
-    public struct StatisticalInfo
+    public class StatisticalInfo
     {
         private int _blocksCount;
         private int _recordsCount;

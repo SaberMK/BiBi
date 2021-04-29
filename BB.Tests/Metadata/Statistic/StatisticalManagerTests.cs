@@ -34,6 +34,7 @@ namespace BB.Tests.Metadata.Statistic
         private ITransactionNumberDispatcher _dispatcher;
         private IConcurrencyManager _concurrencyManager;
 
+        private TableInfo tableInfo;
         private string _logName;
         private Transaction _transaction;
 
@@ -43,7 +44,10 @@ namespace BB.Tests.Metadata.Statistic
         private StatisticsManager manager;
 
         private string tableCatalogName;
-        private string fieldCatalogName; 
+        private string fieldCatalogName;
+        private string viewCatalogName;
+
+        private string tableName;
 
         [SetUp]
         public void Setup()
@@ -61,12 +65,16 @@ namespace BB.Tests.Metadata.Statistic
 
             tableCatalogName = RandomFilename;
             fieldCatalogName = RandomFilename;
+            viewCatalogName = RandomFilename;
+
+            tableName = RandomFilename;
 
             tableManager = new TableManager(true, _transaction, tableCatalogName, fieldCatalogName);
 
-            tableManager.CreateTable("table1", schema, _transaction);
+            tableInfo = new TableInfo(tableName, schema);
+            tableManager.CreateTable(tableName, schema, _transaction);
 
-            viewManager = new ViewManager(true, tableManager, _transaction);
+            viewManager = new ViewManager(true, tableManager, _transaction, viewCatalogName);
             //var indexManager = new IndexManager(true, tableManager, )
             //var metadataManager = new MetadataManager(fileManager, tableManager, viewManager, inde)
         }
@@ -84,7 +92,166 @@ namespace BB.Tests.Metadata.Statistic
         public void CanGetStatisticsFromEmptyTable()
         {
             manager = new StatisticsManager(tableManager, _transaction, tableCatalogName, fieldCatalogName, 2);
-            var data = manager.GetStatisticalInfo("table1", _transaction);
+
+            var data = manager.GetStatisticalInfo(tableName, _transaction);
+
+            Assert.AreEqual(1, data.BlocksAccessed);
+            Assert.AreEqual(0, data.RecordsOutput);
+
+            // Well... this formula is not that accurate :D
+            Assert.AreEqual(1, data.DistinctValues("Id"));
+        }
+
+        [Test]
+        public void CanGetStatisticsFromTableFilledWithValues()
+        {
+            manager = new StatisticsManager(tableManager, _transaction, tableCatalogName, fieldCatalogName, 1);
+
+            var data = manager.GetStatisticalInfo(tableName, _transaction);
+
+            var recordFile = new RecordFile(tableInfo, _transaction);
+            recordFile.BeforeFirst();
+            
+            for(int i = 0; i < 30; ++i)
+            {
+                recordFile.Insert();
+                recordFile.SetInt("Id", i + 10);
+            }
+            _transaction.Commit();
+
+            //Before update
+
+            Assert.AreEqual(1, data.BlocksAccessed);
+            Assert.AreEqual(0, data.RecordsOutput);
+
+            Assert.AreEqual(1, data.DistinctValues("Id"));
+
+            _concurrencyManager = new ConcurrencyManager();
+            _transaction = new Transaction(_dispatcher, _bufferManager, _concurrencyManager, _fileManager, _logManager);
+            //After update
+            var updatedData = manager.GetStatisticalInfo(tableName, _transaction);
+
+            Assert.AreEqual(30, updatedData.RecordsOutput);
+            Assert.AreEqual(1, updatedData.BlocksAccessed);
+            Assert.AreEqual(11, updatedData.DistinctValues("Id"));
+        }
+
+        [Test]
+        public void CanGetStatisticsFromTableFilledWithValuesInTheSameTransaction()
+        {
+            manager = new StatisticsManager(tableManager, _transaction, tableCatalogName, fieldCatalogName, 1);
+
+            var data = manager.GetStatisticalInfo(tableName, _transaction);
+
+            var recordFile = new RecordFile(tableInfo, _transaction);
+            recordFile.BeforeFirst();
+
+            for (int i = 0; i < 30; ++i)
+            {
+                recordFile.Insert();
+                recordFile.SetInt("Id", i + 10);
+            }
+
+            //Before update
+
+            Assert.AreEqual(1, data.BlocksAccessed);
+            Assert.AreEqual(0, data.RecordsOutput);
+
+            Assert.AreEqual(1, data.DistinctValues("Id"));
+
+            //After update
+            var updatedData = manager.GetStatisticalInfo(tableName, _transaction);
+
+            Assert.AreEqual(30, updatedData.RecordsOutput);
+            Assert.AreEqual(1, updatedData.BlocksAccessed);
+            Assert.AreEqual(11, updatedData.DistinctValues("Id"));
+        }
+
+        [Test]
+        public void CanGetStatisticsFromNewTable()
+        {
+            manager = new StatisticsManager(tableManager, _transaction, tableCatalogName, fieldCatalogName, 1);
+
+            var data = manager.GetStatisticalInfo(tableName, _transaction);
+
+            var newTableName = RandomFilename;
+
+            var schema = new Schema();
+            schema.AddIntField("Id");
+            schema.AddStringField("Guid", 40);
+
+            var newTableInfo = new TableInfo(newTableName, schema);
+            tableManager.CreateTable(newTableName, schema, _transaction);
+
+            var recordFile = new RecordFile(newTableInfo, _transaction);
+            recordFile.BeforeFirst();
+
+            for (int i = 0; i < 50; ++i)
+            {
+                recordFile.Insert();
+                recordFile.SetInt("Id", i + 10);
+                recordFile.SetString("Guid", Guid.NewGuid().ToString());
+            }
+
+            _concurrencyManager = new ConcurrencyManager();
+            _transaction = new Transaction(_dispatcher, _bufferManager, _concurrencyManager, _fileManager, _logManager);
+            //Before update
+
+            Assert.AreEqual(1, data.BlocksAccessed);
+            Assert.AreEqual(0, data.RecordsOutput);
+
+            Assert.AreEqual(1, data.DistinctValues("Id"));
+
+            _concurrencyManager = new ConcurrencyManager();
+            _transaction = new Transaction(_dispatcher, _bufferManager, _concurrencyManager, _fileManager, _logManager);
+            //After update
+            var updatedData = manager.GetStatisticalInfo(newTableName, _transaction);
+
+            Assert.AreEqual(50, updatedData.RecordsOutput);
+            Assert.AreEqual(3, updatedData.BlocksAccessed);
+            Assert.AreEqual(17, updatedData.DistinctValues("Id"));
+        }
+
+        [Test]
+        public void CanGetStatisticsFromNewTableInTheSameTransaction()
+        {
+            manager = new StatisticsManager(tableManager, _transaction, tableCatalogName, fieldCatalogName, 1);
+
+
+            var newTableName = RandomFilename;
+
+            var schema = new Schema();
+            schema.AddIntField("Id");
+            schema.AddStringField("Guid", 40);
+
+            var newTableInfo = new TableInfo(newTableName, schema);
+            tableManager.CreateTable(newTableName, schema, _transaction);
+
+            var recordFile = new RecordFile(newTableInfo, _transaction);
+            recordFile.BeforeFirst();
+
+            for (int i = 0; i < 50; ++i)
+            {
+                recordFile.Insert();
+                recordFile.SetInt("Id", i + 10);
+                recordFile.SetString("Guid", Guid.NewGuid().ToString());
+            }
+
+            var updatedData = manager.GetStatisticalInfo(newTableName, _transaction);
+
+            Assert.AreEqual(50, updatedData.RecordsOutput);
+            Assert.AreEqual(3, updatedData.BlocksAccessed);
+            Assert.AreEqual(17, updatedData.DistinctValues("Id"));
+        }
+
+        [Test]
+        public void WouldGetNullFromNotUnexistingTable()
+        {
+            manager = new StatisticsManager(tableManager, _transaction, tableCatalogName, fieldCatalogName, 1);
+
+            var value = manager.GetStatisticalInfo(Guid.NewGuid().ToString(), _transaction);
+
+            Assert.IsNull(value);
         }
 
         private string RandomFilename => $"{Guid.NewGuid()}.bin";

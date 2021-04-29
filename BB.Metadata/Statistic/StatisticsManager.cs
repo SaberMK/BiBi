@@ -69,6 +69,7 @@ namespace BB.Metadata.Statistic
             _callsNumber = 0;
 
             var tableCatalogInfo = _tableManager.GetTableInfo(_tableCatalogName, transaction);
+
             var recordFile = new RecordFile(tableCatalogInfo, transaction);
 
             while (recordFile.Next())
@@ -83,7 +84,13 @@ namespace BB.Metadata.Statistic
             var recordsCount = 0;
 
             var tableInfo = _tableManager.GetTableInfo(tableName, transaction);
+
+            if (tableInfo == null)
+                return null;
+
             var recordFile = new RecordFile(tableInfo, transaction);
+
+            recordFile.BeforeFirst();
 
             while (recordFile.Next())
             {
