@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BB.Metadata.Statistic
 {
-    public class StatisticsManager
+    public class StatisticsManager : IStatisticsManager
     {
         private readonly Dictionary<string, StatisticalInfo> _tableStats;
 

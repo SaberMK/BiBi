@@ -75,8 +75,6 @@ namespace BB.Tests.Metadata.Statistic
             tableManager.CreateTable(tableName, schema, _transaction);
 
             viewManager = new ViewManager(true, tableManager, _transaction, viewCatalogName);
-            //var indexManager = new IndexManager(true, tableManager, )
-            //var metadataManager = new MetadataManager(fileManager, tableManager, viewManager, inde)
         }
 
         [Test]
