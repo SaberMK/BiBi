@@ -10,19 +10,30 @@ using System.Threading.Tasks;
 
 namespace BB.Metadata.Statistic
 {
-    public class StatisticsManager
+    public class StatisticsManager : IStatisticsManager
     {
         private readonly Dictionary<string, StatisticalInfo> _tableStats;
 
         private readonly object _lockObject = new object();
         private readonly int _statisticCallsBeforeUpdateCount;
-        private readonly IMetadataManager _metadataManager;
+        private readonly ITableManager _tableManager;
+
+        private readonly string _tableCatalogName;
+        private readonly string _fieldCatalogName;
 
         private int _callsNumber;
 
-        public StatisticsManager(IMetadataManager metadataManager, Transaction transaction, int statisticCallsBeforeUpdateCount = 100)
+        public StatisticsManager(
+            ITableManager tableManager, 
+            Transaction transaction, 
+            string tableCatalogName = "tblname", 
+            string fieldCatalogName = "fldname", 
+            int statisticCallsBeforeUpdateCount = 100)
         {
-            _metadataManager = metadataManager;
+            _tableCatalogName = tableCatalogName;
+            _fieldCatalogName = fieldCatalogName;
+
+            _tableManager = tableManager;
             _statisticCallsBeforeUpdateCount = statisticCallsBeforeUpdateCount;
             _tableStats = new Dictionary<string, StatisticalInfo>();
 
@@ -57,7 +68,8 @@ namespace BB.Metadata.Statistic
 
             _callsNumber = 0;
 
-            var tableCatalogInfo = _metadataManager.GetTableInfo("tblcat", transaction);
+            var tableCatalogInfo = _tableManager.GetTableInfo(_tableCatalogName, transaction);
+
             var recordFile = new RecordFile(tableCatalogInfo, transaction);
 
             while (recordFile.Next())
@@ -71,8 +83,14 @@ namespace BB.Metadata.Statistic
         {
             var recordsCount = 0;
 
-            var tableInfo = _metadataManager.GetTableInfo(tableName, transaction);
+            var tableInfo = _tableManager.GetTableInfo(tableName, transaction);
+
+            if (tableInfo == null)
+                return null;
+
             var recordFile = new RecordFile(tableInfo, transaction);
+
+            recordFile.BeforeFirst();
 
             while (recordFile.Next())
             {

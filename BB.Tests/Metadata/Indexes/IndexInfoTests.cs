@@ -6,7 +6,9 @@ using BB.Memory.Buffers;
 using BB.Memory.Buffers.Strategies;
 using BB.Memory.Logger;
 using BB.Metadata.Indexes;
+using BB.Metadata.Statistic;
 using BB.Metadata.Table;
+using BB.Metadata.View;
 using BB.Record.Base;
 using BB.Record.Entity;
 using BB.Transactions;
@@ -35,8 +37,19 @@ namespace BB.Tests.Metadata.Indexes
         private Transaction _transaction;
 
         private TableManager tableManager;
+        private ViewManager viewManager;
+
+        private TableInfo tableInfo;
+        private string tableCatalogName;
+        private string fieldCatalogName;
+        private string viewCatalogName;
+
+        private string tableName;
 
         private IndexInfo indexInfo;
+        private string indexName;
+
+        private StatisticsManager statisticsManager;
 
         [SetUp]
         public void Setup()
@@ -48,6 +61,24 @@ namespace BB.Tests.Metadata.Indexes
             _dispatcher = new TransactionNumberDispatcher(10);
             _concurrencyManager = new ConcurrencyManager();
             _transaction = new Transaction(_dispatcher, _bufferManager, _concurrencyManager, _fileManager, _logManager);
+
+            var schema = new Schema();
+            schema.AddIntField("Id");
+
+            tableCatalogName = RandomFilename;
+            fieldCatalogName = RandomFilename;
+            viewCatalogName = RandomFilename;
+
+            tableName = RandomFilename;
+
+            tableManager = new TableManager(true, _transaction, tableCatalogName, fieldCatalogName);
+
+            tableInfo = new TableInfo(tableName, schema);
+            tableManager.CreateTable(tableName, schema, _transaction);
+
+            viewManager = new ViewManager(true, tableManager, _transaction, viewCatalogName);
+            statisticsManager = new StatisticsManager(tableManager, _transaction, tableCatalogName, fieldCatalogName);
+
         }
 
         [Test]
@@ -55,7 +86,7 @@ namespace BB.Tests.Metadata.Indexes
         {
             Assert.DoesNotThrow(() =>
             {
-                
+                indexInfo = new IndexInfo("index", tableName, "Id", tableManager, statisticsManager, _transaction, 1024);
             });
         }
 

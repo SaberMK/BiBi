@@ -17,16 +17,20 @@ namespace BB.Metadata.Indexes
 
         private readonly TableInfo _tableInfo;
         private readonly string _indexTableName;
-        private readonly IMetadataManager _metadataManager;
+        private readonly ITableManager _tableManager;
+        private readonly IStatisticsManager _statisticsManager;
+
         public IndexManager(
             bool isNew, 
             ITableManager tableManager, 
+            IStatisticsManager statisticsManager,
             Transaction transaction, 
-            IMetadataManager metadataManager, 
             string indexTableName = "idxcat")
         {
             _indexTableName = indexTableName;
-            _metadataManager = metadataManager;
+
+            _tableManager = tableManager;
+            _statisticsManager = statisticsManager;
 
             if (isNew)
             {
@@ -65,7 +69,7 @@ namespace BB.Metadata.Indexes
                     var indexName = recordFile.GetString("idxname");
                     var fieldName = recordFile.GetString("fldname");
 
-                    var indexInfo = new IndexInfo(indexName, tableName, fieldName, _metadataManager, transaction);
+                    var indexInfo = new IndexInfo(indexName, tableName, fieldName, _tableManager, _statisticsManager, transaction);
 
                     result.Add(fieldName, indexInfo);
                 }
