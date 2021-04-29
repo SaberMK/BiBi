@@ -23,17 +23,24 @@ namespace BB.Metadata.Indexes
         private readonly Transaction _transaction;
         private readonly TableInfo _tableInfo;
         private readonly StatisticalInfo _statInfo;
-        private readonly IMetadataManager _metadataManager;
 
-        public IndexInfo(string indexName, string tableName, string fieldName, IMetadataManager metadataManager, Transaction transaction)
+        private readonly int _blockSize;
+
+        public IndexInfo(string indexName, 
+            string tableName, 
+            string fieldName, 
+            ITableManager tableManager, 
+            IStatisticsManager statisticsManager, 
+            Transaction transaction, 
+            int blockSize = 400)
         {
             _indexName = indexName;
             _fieldName = fieldName;
             _transaction = transaction;
-            _metadataManager = metadataManager;
 
-            _tableInfo = _metadataManager.GetTableInfo(tableName, transaction);
-            _statInfo = _metadataManager.GetStatisticsInfo(tableName, transaction);
+            _blockSize = blockSize;
+            _tableInfo = tableManager.GetTableInfo(tableName, transaction);
+            _statInfo = statisticsManager.GetStatisticalInfo(tableName, transaction);
         }
 
         public BaseIndex Open()
@@ -44,7 +51,7 @@ namespace BB.Metadata.Indexes
 
         public int BlocksAccessed()
         {
-            var recordsPerBlock = _metadataManager.BlockSize / _tableInfo.RecordLength;
+            var recordsPerBlock = _blockSize / _tableInfo.RecordLength;
             int blocksCount = _statInfo.RecordsOutput / recordsPerBlock;
 
             return BTreeIndex.SearchCost(blocksCount, recordsPerBlock);
