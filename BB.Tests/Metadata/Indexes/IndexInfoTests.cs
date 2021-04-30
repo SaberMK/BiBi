@@ -305,8 +305,6 @@ namespace BB.Tests.Metadata.Indexes
             Assert.Pass();
         }
 
-
-
         [Test]
         public void CanCreateStringIndex()
         {

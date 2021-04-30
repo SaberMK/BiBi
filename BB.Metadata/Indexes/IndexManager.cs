@@ -13,7 +13,7 @@ namespace BB.Metadata.Indexes
     public class IndexManager : IIndexManager
     {
         // TODO should divide it for separate name, table and field 
-        private const int MAX_INDEX_LENGTH = 0;
+        private const int MAX_INDEX_LENGTH = 50;
 
         private readonly TableInfo _tableInfo;
         private readonly string _indexTableName;
