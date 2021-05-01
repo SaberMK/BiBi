@@ -9,17 +9,16 @@ namespace BB.Query.Abstract
     public interface IScan
     {
         void BeforeFirst();
-        void Next();
+        bool Next();
         void Close();
         bool HasField(string fieldName);
 
-
         Constant GetValue(string fieldName);
         int GetInt(string fieldName);
-        int GetBool(string fieldName);
-        int GetByte(string fieldName);
-        int GetBlob(string fieldName);
-        int GetString(string fieldName);
-        int GetDate(string fieldName);
+        bool GetBool(string fieldName);
+        byte GetByte(string fieldName);
+        byte[] GetBlob(string fieldName);
+        string GetString(string fieldName);
+        DateTime GetDate(string fieldName);
     }
 }

@@ -10,14 +10,14 @@ namespace BB.Query.Abstract
     public interface IUpdateScan : IScan
     {
         void SetValue(string fieldName, Constant constant);
-        void SetInt(string fieldName);
-        void SetBool(string fieldName);
-        void SetByte(string fieldName);
-        void SetBlob(string fieldName);
-        void SetString(string fieldName);
-        void SetDate(string fieldName);
+        void SetInt(string fieldName, int value);
+        void SetBool(string fieldName, bool value);
+        void SetByte(string fieldName, byte value);
+        void SetBlob(string fieldName, byte[] value);
+        void SetString(string fieldName, string value);
+        void SetDate(string fieldName, DateTime value);
 
-        RID GetRID { get; }
+        RID RID { get; }
         void MoveToRID(RID rid);
     }
 }
