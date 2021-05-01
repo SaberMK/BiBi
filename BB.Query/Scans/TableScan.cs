@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BB.Query
+namespace BB.Query.Scans
 {
     public class TableScan : IUpdateScan
     {

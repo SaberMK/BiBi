@@ -10,4 +10,8 @@
     <ProjectReference Include="..\BB.Record\BB.Record.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Plans\" />
+  </ItemGroup>
+
 </Project>
