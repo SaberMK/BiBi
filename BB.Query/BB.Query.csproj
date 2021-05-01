@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BB.Memory\BB.Memory.csproj" />
+    <ProjectReference Include="..\BB.Metadata\BB.Metadata.csproj" />
+    <ProjectReference Include="..\BB.Record\BB.Record.csproj" />
+  </ItemGroup>
+
+</Project>
