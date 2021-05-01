@@ -32,7 +32,7 @@ namespace BB.Metadata.Indexes
             ITableManager tableManager, 
             IStatisticsManager statisticsManager, 
             Transaction transaction, 
-            int blockSize = 400)
+            int blockSize = 1024)
         {
             _indexName = indexName;
             _fieldName = fieldName;

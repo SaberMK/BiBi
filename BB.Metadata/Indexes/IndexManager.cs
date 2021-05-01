@@ -13,22 +13,26 @@ namespace BB.Metadata.Indexes
     public class IndexManager : IIndexManager
     {
         // TODO should divide it for separate name, table and field 
-        private const int MAX_INDEX_LENGTH = 0;
+        private const int MAX_INDEX_LENGTH = 50;
 
         private readonly TableInfo _tableInfo;
         private readonly string _indexTableName;
         private readonly ITableManager _tableManager;
         private readonly IStatisticsManager _statisticsManager;
 
+        private readonly int _blockSize;
+
         public IndexManager(
             bool isNew, 
             ITableManager tableManager, 
             IStatisticsManager statisticsManager,
             Transaction transaction, 
-            string indexTableName = "idxcat")
+            string indexTableName = "idxcat",
+            int blockSize = 1024)
         {
             _indexTableName = indexTableName;
 
+            _blockSize = blockSize;
             _tableManager = tableManager;
             _statisticsManager = statisticsManager;
 
@@ -69,7 +73,7 @@ namespace BB.Metadata.Indexes
                     var indexName = recordFile.GetString("idxname");
                     var fieldName = recordFile.GetString("fldname");
 
-                    var indexInfo = new IndexInfo(indexName, tableName, fieldName, _tableManager, _statisticsManager, transaction);
+                    var indexInfo = new IndexInfo(indexName, tableName, fieldName, _tableManager, _statisticsManager, transaction, _blockSize);
 
                     result.Add(fieldName, indexInfo);
                 }
