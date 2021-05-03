@@ -2,6 +2,7 @@
 using BB.Query.Expressions;
 using BB.Record.Base;
 using BB.Record.Entity;
+using BB.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,11 +19,11 @@ namespace BB.Query.Scans
         public RID RID => _recordFile.CurrentRID;
 
         public TableScan(
-            RecordFile recordFile,
-            Schema schema)
+            TableInfo tableInfo,
+            Transaction transaction)
         {
-            _recordFile = recordFile;
-            _schema = schema;
+            _recordFile = new RecordFile(tableInfo, transaction);
+            _schema = tableInfo.Schema;
         }
 
         public void BeforeFirst()
