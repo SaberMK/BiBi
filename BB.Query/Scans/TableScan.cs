@@ -1,4 +1,5 @@
 ﻿using BB.Query.Abstract;
+using BB.Query.Expressions;
 using BB.Record.Base;
 using BB.Record.Entity;
 using System;

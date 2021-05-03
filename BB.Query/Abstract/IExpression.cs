@@ -1,4 +1,5 @@
-﻿using BB.Record.Base;
+﻿using BB.Query.Expressions;
+using BB.Record.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;

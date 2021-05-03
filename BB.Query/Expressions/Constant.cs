@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BB.Query.Abstract
+namespace BB.Query.Expressions
 {
     public interface IConstant
     {
