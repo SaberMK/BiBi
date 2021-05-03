@@ -17,6 +17,9 @@ namespace BB.Query.Abstract
         void SetBlob(string fieldName, byte[] value);
         void SetString(string fieldName, string value);
         void SetDate(string fieldName, DateTime value);
+        void Insert();
+        void Delete();
+
 
         RID RID { get; }
         void MoveToRID(RID rid);

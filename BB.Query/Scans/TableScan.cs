@@ -128,5 +128,8 @@ namespace BB.Query.Scans
 
         public void MoveToRID(RID rid)
             => _recordFile.MoveToRID(rid);
+
+        public void Insert() => _recordFile.Insert();
+        public void Delete() => _recordFile.Delete();
     }
 }
