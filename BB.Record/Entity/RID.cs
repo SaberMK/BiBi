@@ -8,6 +8,8 @@ namespace BB.Record.Entity
 {
     public readonly struct RID
     {
+        public readonly RID MissedRID => new RID(-1, -1);
+
         public readonly int BlockNumber;
         public readonly int Id;
 
